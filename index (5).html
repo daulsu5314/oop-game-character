@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>클래스 메이커 · 캐릭터 소환</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+<style>
+  :root{--bg:#13122a;--bg2:#1b1a3a;--surface:#23224a;--surface2:#2c2b58;--line:#3a3970;--ink:#edeefb;--muted:#9fa0d4;
+    --hp:#3fd68c;--atk:#ff7e54;--def:#5b8def;--violet:#a487ff;--gold:#ffd24a;--shadow:0 10px 30px rgba(0,0,0,.4);}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;padding:0}
+  body{background:radial-gradient(1200px 600px at 50% -10%,#2a2860 0%,var(--bg) 55%) fixed;color:var(--ink);font-family:'Noto Sans KR',system-ui,sans-serif;min-height:100vh;line-height:1.6;overflow-x:hidden}
+  .stars{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(1.4px 1.4px at 20% 30%,#fff5 50%,transparent),radial-gradient(1.2px 1.2px at 70% 60%,#fff4 50%,transparent),radial-gradient(1.6px 1.6px at 40% 80%,#fff3 50%,transparent),radial-gradient(1.2px 1.2px at 85% 20%,#fff4 50%,transparent),radial-gradient(1.3px 1.3px at 12% 70%,#fff3 50%,transparent)}
+  .wrap{position:relative;z-index:1;max-width:580px;margin:0 auto;padding:20px 18px 40px;min-height:100vh;display:flex;flex-direction:column}
+  .wrap.wide{max-width:920px}
+  .screen{display:none;animation:fade .35s ease}.screen.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.screen{animation:none}}
+  .display{font-family:'Black Han Sans',sans-serif;letter-spacing:.5px;line-height:1.1}
+  .eyebrow{font-size:12px;letter-spacing:3px;color:var(--violet);font-weight:700;text-transform:uppercase}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font-family:'Black Han Sans',sans-serif;font-size:19px;letter-spacing:1px;color:#161430;background:linear-gradient(180deg,#b9a2ff,var(--violet));border:none;border-radius:16px;padding:16px;cursor:pointer;box-shadow:var(--shadow);transition:transform .12s,filter .12s}
+  .btn:hover{filter:brightness(1.06)}.btn:active{transform:translateY(2px)}
+  .btn:disabled{filter:grayscale(.7) brightness(.7);cursor:not-allowed;box-shadow:none}
+  .btn.gold{background:linear-gradient(180deg,#ffe48a,var(--gold))}
+  .btn.ghost{background:transparent;color:var(--muted);border:1.5px solid var(--line);box-shadow:none;font-size:15px;font-family:'Noto Sans KR';font-weight:700}
+  .btn:focus-visible{outline:3px solid #fff;outline-offset:2px}
+  input[type=text]{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:15px;color:var(--ink);font-size:17px;font-family:inherit}
+  input[type=text]:focus{outline:none;border-color:var(--violet)}
+  .teacher-link{margin-top:22px;text-align:center}.teacher-link a{color:var(--muted);font-size:13px;text-decoration:none;border-bottom:1px dashed var(--line);cursor:pointer}
+
+  /* JOIN */
+  .hero{text-align:center;margin-top:7vh}
+  .hero .badge{font-size:58px;line-height:1;margin-bottom:6px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
+  .hero h1{font-size:40px;margin:6px 0 4px;color:#fff}.hero h1 .vio{color:var(--violet)}
+  .hero p{color:var(--muted);margin:10px auto 24px;max-width:320px}
+
+  /* LOBBY */
+  .lobby{text-align:center;margin-top:9vh}
+  .lobby .spin{font-size:54px;animation:bob 1.6s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  .lobby h2{font-family:'Black Han Sans';font-size:26px;color:#fff;margin:14px 0 6px}
+  .lobby .who{color:var(--violet);font-weight:800}
+  .lobby p{color:var(--muted);max-width:300px;margin:6px auto}
+  .dots span{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--violet);margin:0 3px;animation:blink 1.4s infinite}
+  .dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+
+  .sec-title{font-family:'Black Han Sans';font-size:24px;color:#fff;margin:2px 0 14px}
+  .sec-title .small{font-family:'Noto Sans KR';font-size:13px;color:var(--muted);font-weight:500;display:block;letter-spacing:0}
+  label.fld{display:block;font-weight:700;font-size:14px;margin:16px 0 8px}
+  .jobs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .job{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:10px 4px;text-align:center;cursor:pointer;transition:.15s;font-size:12px;font-weight:700;color:var(--muted)}
+  .job .ico{display:block;font-size:24px;margin-bottom:3px}.job.sel{border-color:var(--violet);background:#332f63;color:#fff}
+  .preview-wrap{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:6px}
+  .preview-stage{width:118px;height:150px;flex:0 0 auto;display:flex;align-items:flex-end;justify-content:center;background:linear-gradient(180deg,#2a2860,#1a193b);border-radius:12px}
+  .preview-stage svg{width:96px;height:auto}.custom{flex:1}
+  .custom .clab{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px}
+  .swatches{display:flex;flex-wrap:wrap;gap:8px}
+  .sw{width:30px;height:30px;border-radius:8px;cursor:pointer;border:2px solid transparent;box-shadow:inset 0 0 0 1px #0003}
+  .sw.sel{border-color:#fff;transform:scale(1.08)}
+  .points{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 6px}
+  .points .lab{font-weight:700;font-size:14px}.points .left{font-family:'Black Han Sans';font-size:30px;color:var(--gold)}
+  .points .left.zero{color:var(--hp)}.points .left small{font-size:13px;color:var(--muted);font-family:'Noto Sans KR'}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+  .stat .row{display:flex;align-items:center;gap:10px}.stat .sico{font-size:22px;width:26px;text-align:center}
+  .stat .sname{font-weight:700;font-size:15px;flex:1}.stat .sname em{font-style:normal;color:var(--muted);font-size:12px;font-weight:500}
+  .stepper{display:flex;align-items:center;background:var(--bg2);border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .stepper button{width:38px;height:38px;border:none;background:transparent;color:#fff;font-size:22px;font-family:'Black Han Sans';cursor:pointer}
+  .stepper button:active{background:#ffffff22}.stepper .val{min-width:42px;text-align:center;font-family:'Black Han Sans';font-size:20px}
+  .bar{height:8px;border-radius:6px;background:#ffffff14;margin-top:10px;overflow:hidden}.bar>i{display:block;height:100%;border-radius:6px;transition:width .25s}
+  .stat.hp .bar>i{background:var(--hp)}.stat.atk .bar>i{background:var(--atk)}.stat.def .bar>i{background:var(--def)}
+  .stat.hp .sico{color:var(--hp)}.stat.atk .sico{color:var(--atk)}.stat.def .sico{color:var(--def)}
+
+  /* BATTLE */
+  .battlefield{background:linear-gradient(180deg,#1c1b3d 0%,#262350 70%,#2e2a40 100%);border:1px solid var(--line);border-radius:18px;padding:16px 14px 10px;margin-bottom:6px;position:relative;overflow:hidden}
+  .ground{position:absolute;left:0;right:0;bottom:0;height:46px;background:linear-gradient(180deg,#3a3358,#241f3a)}
+  .fighters{position:relative;display:flex;justify-content:space-between;align-items:flex-end;min-height:172px;z-index:2}
+  .bf{position:relative;width:46%;display:flex;flex-direction:column;align-items:center}
+  .art{position:relative;width:120px;height:160px;display:flex;align-items:flex-end;justify-content:center}
+  .art svg{width:108px;height:auto;filter:drop-shadow(0 8px 6px #0006)}
+  .flash{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,#ff4d4d 0%,transparent 65%);opacity:0;pointer-events:none}
+  .dmgnum{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-family:'Black Han Sans';font-size:26px;color:#ff5a5a;text-shadow:0 2px 0 #5a0000;pointer-events:none}
+  .ouch{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-family:'Black Han Sans';font-size:15px;color:#fff;background:#e0443a;padding:2px 9px;border-radius:10px;white-space:nowrap;opacity:0;pointer-events:none}
+  @keyframes dmgFloat{0%{opacity:0;transform:translate(-50%,6px) scale(.6)}20%{opacity:1;transform:translate(-50%,-4px) scale(1.15)}100%{opacity:0;transform:translate(-50%,-40px) scale(1)}}
+  @keyframes ouchPop{0%{opacity:0;transform:translate(-50%,4px)}25%{opacity:1;transform:translate(-50%,-6px)}80%{opacity:1;transform:translate(-50%,-8px)}100%{opacity:0;transform:translate(-50%,-14px)}}
+  @keyframes flashAnim{0%{opacity:0}30%{opacity:.85}100%{opacity:0}}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px) rotate(-4deg)}50%{transform:translateX(6px) rotate(3deg)}80%{transform:translateX(-4px)}}
+  @keyframes lungeR{0%{transform:translateX(0)}45%{transform:translateX(46px) rotate(4deg)}100%{transform:translateX(0)}}
+  @keyframes lungeL{0%{transform:translateX(0)}45%{transform:translateX(-46px) rotate(-4deg)}100%{transform:translateX(0)}}
+  @keyframes faint{0%{transform:rotate(0)}100%{transform:rotate(86deg) translateY(26px);opacity:.35}}
+  @keyframes cheer{0%,100%{transform:translateY(0)}40%{transform:translateY(-22px)}}
+  .art.shake{animation:shake .4s}.art.lungeR{animation:lungeR .4s}.art.lungeL{animation:lungeL .4s}
+  .art.faint{animation:faint .6s forwards}.art.cheer{animation:cheer .5s 2}
+  .flash.on{animation:flashAnim .45s}.dmgnum.go{animation:dmgFloat .9s forwards}.ouch.go{animation:ouchPop .8s forwards}
+  .nameTag{font-weight:800;font-size:13px;margin-bottom:2px}.nameTag .job{color:var(--muted);font-weight:600;font-size:11px}
+  .hpwrap{width:100%;max-width:150px}.hpwrap .hl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin:6px 0 3px}
+  .hpbar{height:11px;background:#0006;border-radius:7px;overflow:hidden;border:1px solid #ffffff1a}
+  .hpbar>i{display:block;height:100%;background:linear-gradient(90deg,var(--hp),#9bf3c6);transition:width .35s}
+  .hpbar.foe>i{background:linear-gradient(90deg,#ff6b6b,#ffb199)}
+  .vsbadge{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:'Black Han Sans';color:var(--gold);font-size:20px;z-index:3}
+  .log{background:#0e0d22;border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:12px 0;height:96px;overflow-y:auto;font-size:13px}
+  .log p{margin:4px 0;color:var(--muted);animation:fade .2s}.log p .r{color:var(--atk);font-weight:700}
+  .verdict{text-align:center;margin:10px 0}.verdict .big{font-family:'Black Han Sans';font-size:42px}
+  .verdict.win .big{color:var(--gold)}.verdict.lose .big{color:#ff7a7a}.verdict p{color:var(--muted);margin:2px 0 0;font-size:13px}
+
+  /* RESULT */
+  .reveal-lead{text-align:center;margin:6px 0 18px}.reveal-lead .big{font-family:'Black Han Sans';font-size:25px;color:#fff}.reveal-lead .big .vio{color:var(--violet)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:15px;margin:11px 0}
+  .card .ctag{font-size:11px;letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:8px}
+  .card.klass .ctag{color:var(--violet)}.card.attr .ctag{color:var(--gold)}.card.method .ctag{color:var(--hp)}.card.inst .ctag{color:var(--def)}
+  .card h3{font-family:'Black Han Sans';font-size:20px;margin:0 0 4px;color:#fff}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}.chip{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:13px;font-weight:600}
+  .kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #ffffff14;font-size:14px}.kv:last-child{border:none}.kv span:first-child{color:var(--muted)}.kv b{color:#fff}
+  .inst-head{display:flex;align-items:center;gap:12px}.inst-head svg{width:54px;height:auto}
+
+  /* CODE */
+  pre.code{background:#0d0c20;border:1px solid var(--line);border-radius:16px;padding:16px;overflow-x:auto;font-family:'JetBrains Mono','Noto Sans KR',monospace;font-size:12.5px;line-height:1.7;margin:6px 0}
+  .code .kw{color:#c792ea}.code .fn{color:#82aaff}.code .str{color:#c3e88d}.code .num{color:#f78c6c}.code .self{color:#f07178}.code .cm{color:#6b7394;font-style:italic}
+  .next{background:linear-gradient(180deg,#2a2860,#211f48);border:1px solid var(--violet);border-radius:16px;padding:15px;margin:16px 0}.next b{color:#fff}
+  .footer-actions{display:flex;gap:10px;margin-top:8px}
+
+  /* TEACHER */
+  .tsec{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+  .tsec h3{font-family:'Black Han Sans';font-size:18px;margin:0 0 10px;color:#fff}
+  .qrbox{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center}
+  #qr{background:#fff;padding:10px;border-radius:12px;line-height:0}
+  #qr img,#qr canvas{display:block}
+  .qrinfo{flex:1;min-width:180px}
+  .qrinfo .url{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--violet);word-break:break-all;background:var(--bg2);padding:8px 10px;border-radius:8px;margin-top:8px}
+  .joincount{font-family:'Black Han Sans';font-size:40px;color:var(--gold);line-height:1}
+  .namechips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .nchip{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:13px;font-weight:600}
+  .counts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 0}
+  .ccard{border-radius:14px;padding:12px;text-align:center;border:1px solid var(--line)}
+  .ccard .n{font-family:'Black Han Sans';font-size:28px;line-height:1}.ccard .l{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px}
+  .ccard.making{background:#2a2750}.ccard.making .n{color:var(--muted)}.ccard.ready{background:#2a3550}.ccard.ready .n{color:var(--gold)}.ccard.done{background:#1e3a32}.ccard.done .n{color:var(--hp)}
+  .ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:12px}
+  .gcard{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center;position:relative}
+  .gcard svg{width:44px;height:auto}.gcard .gname{font-weight:700;font-size:13px;margin-top:2px}.gcard .gjob{font-size:10px;color:var(--muted)}
+  .gcard .badge{position:absolute;top:7px;right:7px;font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px}
+  .gcard .badge.making{background:#444070;color:#cfd0ee}.gcard .badge.ready{background:#5a4a1e;color:var(--gold)}.gcard .badge.done{background:#1f5040;color:var(--hp)}.gcard .badge.lobby{background:#3a3760;color:#cfd0ee}
+  .gcard .gstats{display:flex;justify-content:center;gap:5px;margin-top:6px;font-size:10px;font-weight:700}
+  .gcard .gstats .h{color:var(--hp)}.gcard .gstats .a{color:var(--atk)}.gcard .gstats .d{color:var(--def)}
+  .gcard .gres{margin-top:4px;font-size:10px;font-weight:800}.gcard .gres.w{color:var(--gold)}.gcard .gres.l{color:#ff7a7a}
+  .empty{text-align:center;color:var(--muted);padding:24px 10px;font-size:14px}
+  .phasebadge{display:inline-block;font-size:12px;font-weight:800;padding:4px 12px;border-radius:20px;margin-left:8px}
+  .phasebadge.lobby{background:#3a3760;color:#cfd0ee}.phasebadge.create{background:#1f5040;color:var(--hp)}.phasebadge.battle{background:#5a1f2e;color:#ff9a9a}
+  #wait-avatar svg{width:96px;height:auto}
+  .warn{background:#3a2750;border:1px solid #6b4ad6;border-radius:12px;padding:10px 12px;font-size:12.5px;color:#d9cfff;margin-top:10px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#fff;color:#161430;padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;opacity:0;transition:.3s;z-index:50;box-shadow:var(--shadow)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.spacer{flex:1}
+  .row2{display:flex;gap:10px}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="wrap" id="wrap">
+
+  <!-- JOIN -->
+  <section id="s-join" class="screen on">
+    <div class="hero">
+      <div class="badge">🧙‍♂️⚔️👹</div>
+      <div class="eyebrow">정보 · 객체지향 프로그래밍</div>
+      <h1 class="display">클래스 메이커<br><span class="vio">캐릭터 소환</span></h1>
+      <p>이름을 입력하고 입장하세요. 모두 모이면 나만의 캐릭터를 만들어 몬스터와 싸웁니다!</p>
+      <label class="fld" for="joinName" style="text-align:left">이름 (또는 닉네임)</label>
+      <input type="text" id="joinName" maxlength="12" placeholder="예: 김코딩" autocomplete="off">
+      <button class="btn" style="margin-top:14px" onclick="joinRoom()">입장하기 ▶</button>
+      <div class="teacher-link"><a onclick="openTeacher()">🖥 선생님이신가요? 선생님 화면 →</a></div>
+    </div>
+  </section>
+
+  <!-- LOBBY -->
+  <section id="s-lobby" class="screen">
+    <div class="lobby">
+      <div class="spin">🧙‍♂️</div>
+      <h2><span class="who" id="lobbyName">친구</span>님, 입장 완료!</h2>
+      <p>선생님이 시작하면 캐릭터를 만들 수 있어요.<br>잠시만 기다려 주세요.</p>
+      <div class="dots"><span></span><span></span><span></span></div>
+    </div>
+  </section>
+
+  <!-- INPUT -->
+  <section id="s-input" class="screen">
+    <div class="sec-title">내 캐릭터 만들기<span class="small">직업·옷색 고르고, 능력치 100점을 나눠요</span></div>
+    <label class="fld">직업</label>
+    <div class="jobs" id="jobs">
+      <div class="job sel" data-job="전사"><span class="ico">⚔️</span>전사</div>
+      <div class="job" data-job="마법사"><span class="ico">🧙</span>마법사</div>
+      <div class="job" data-job="궁수"><span class="ico">🏹</span>궁수</div>
+      <div class="job" data-job="도적"><span class="ico">🗡️</span>도적</div>
+    </div>
+    <label class="fld">꾸미기</label>
+    <div class="preview-wrap">
+      <div class="preview-stage" id="preview"></div>
+      <div class="custom"><div class="clab">🎽 옷 색깔</div><div class="swatches" id="sw-outfit"></div></div>
+    </div>
+    <div class="points"><span class="lab">능력치 배분</span><span class="left" id="left">100<small> 남음</small></span></div>
+    <div class="stat hp"><div class="row"><span class="sico">❤️</span><span class="sname">체력 <em>버티는 힘 (hp)</em></span>
+      <div class="stepper"><button onclick="adj('hp',-5)">–</button><span class="val" id="v-hp">0</span><button onclick="adj('hp',5)">+</button></div></div><div class="bar"><i id="b-hp" style="width:0%"></i></div></div>
+    <div class="stat atk"><div class="row"><span class="sico">🔥</span><span class="sname">공격력 <em>때리는 힘 (attack)</em></span>
+      <div class="stepper"><button onclick="adj('attack',-5)">–</button><span class="val" id="v-attack">0</span><button onclick="adj('attack',5)">+</button></div></div><div class="bar"><i id="b-attack" style="width:0%"></i></div></div>
+    <div class="stat def"><div class="row"><span class="sico">🛡️</span><span class="sname">방어력 <em>막는 힘 (defense)</em></span>
+      <div class="stepper"><button onclick="adj('defense',-5)">–</button><span class="val" id="v-defense">0</span><button onclick="adj('defense',5)">+</button></div></div><div class="bar"><i id="b-defense" style="width:0%"></i></div></div>
+    <div style="margin-top:20px"><button class="btn gold" id="fightBtn" disabled onclick="readyUp()">✅ 준비 완료!</button>
+      <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:8px" id="hint">남은 점수를 0으로 만들면 준비할 수 있어요</p></div>
+  </section>
+
+  <!-- WAIT (전투 대기) -->
+  <section id="s-wait" class="screen">
+    <div class="lobby">
+      <div id="wait-avatar" style="display:flex;justify-content:center"></div>
+      <h2 style="margin-top:10px">준비 완료! ✅</h2>
+      <p>선생님이 <b style="color:var(--gold)">싸움 시작</b>을 누르면<br>전투가 시작돼요. 잠깐만 기다려요!</p>
+      <div class="dots"><span></span><span></span><span></span></div>
+      <button class="btn ghost" style="max-width:220px;margin:18px auto 0" onclick="go('input')">✏️ 다시 수정하기</button>
+    </div>
+  </section>
+
+  <!-- BATTLE -->
+  <section id="s-battle" class="screen">
+    <div class="sec-title" style="text-align:center">⚔️ 전투!</div>
+    <div class="battlefield"><div class="ground"></div><div class="vsbadge">VS</div>
+      <div class="fighters">
+        <div class="bf"><div class="nameTag"><span id="me-name">내 캐릭터</span> <span class="job" id="me-job">전사</span></div>
+          <div class="hpwrap"><div class="hl"><span>HP</span><span id="me-hp-num"></span></div><div class="hpbar"><i id="me-hp" style="width:100%"></i></div></div>
+          <div class="art" id="art-me"></div><div class="flash" id="flash-me"></div></div>
+        <div class="bf"><div class="nameTag">고블린 <span class="job">몬스터</span></div>
+          <div class="hpwrap"><div class="hl"><span>HP</span><span id="foe-hp-num"></span></div><div class="hpbar foe"><i id="foe-hp" style="width:100%"></i></div></div>
+          <div class="art" id="art-foe"></div><div class="flash" id="flash-foe"></div></div>
+      </div></div>
+    <div class="log" id="log"></div>
+    <div class="verdict" id="verdict" style="display:none"><div class="big"></div><p></p></div>
+    <button class="btn" id="toResult" style="display:none" onclick="go('result')">결과 보기 ▶</button>
+  </section>
+
+  <!-- RESULT -->
+  <section id="s-result" class="screen">
+    <div class="reveal-lead"><div class="big">사실 너는 방금<br><span class="vio">객체지향 프로그래밍</span>을 했어!</div></div>
+    <div class="card klass"><div class="ctag">클래스 · 설계도</div><h3>Character</h3><p style="color:var(--muted);font-size:13px;margin:2px 0 0">반 친구 모두가 쓴 똑같은 설계도. 여기서 캐릭터를 찍어내요.</p></div>
+    <div class="card attr"><div class="ctag">속성 · 가진 상태</div><div class="chips"><span class="chip">이름</span><span class="chip">직업</span><span class="chip">체력</span><span class="chip">공격력</span><span class="chip">방어력</span><span class="chip">옷색</span></div></div>
+    <div class="card method"><div class="ctag">메소드 · 할 수 있는 행동</div><div class="chips"><span class="chip">공격하다()</span><span class="chip">회복하다()</span></div></div>
+    <div class="card inst"><div class="ctag">인스턴스 · 내가 만든 실체</div>
+      <div class="inst-head"><div id="r-avatar"></div><h3 id="r-name" style="font-size:20px">내 캐릭터</h3></div>
+      <div class="kv"><span>직업</span><b id="r-job">-</b></div>
+      <div class="kv"><span>체력 / 공격력 / 방어력</span><b id="r-stats">-</b></div>
+      <div class="kv"><span>옷색</span><b id="r-look">-</b></div>
+      <div class="kv"><span>전투 결과</span><b id="r-result">-</b></div>
+      <p style="color:var(--muted);font-size:12.5px;margin:10px 0 0">👉 같은 <b style="color:var(--ink)">설계도(클래스)</b>인데 친구들마다 값이 다르죠? 이게 <b style="color:var(--ink)">"구조는 같지만 값은 다른"</b> 인스턴스예요.</p></div>
+    <button class="btn" onclick="go('code');renderCode()">코드로 보기 &lt;/&gt;</button>
+  </section>
+
+  <!-- CODE -->
+  <section id="s-code" class="screen">
+    <div class="sec-title">파이썬 코드로는?<span class="small">네가 설계한 게 진짜 파이썬 코드가 됐어요</span></div>
+    <pre class="code" id="codeOut"></pre>
+    <button class="btn ghost" onclick="copyCode()">📋 코드 복사하기</button>
+    <div class="next"><div class="eyebrow">다음 시간 예고</div><p style="margin:6px 0 0">이번엔 <b>몬스터</b>랑 싸웠지만, 다음 시간엔 <b>내 캐릭터끼리</b> 싸우게 만들 거예요. 객체와 객체가 주고받는 <b>객체 간 상호작용</b>이 진짜 핵심!</p></div>
+    <div class="footer-actions"><button class="btn ghost" onclick="resetAll()">🔄 처음으로</button></div>
+  </section>
+
+  <!-- TEACHER -->
+  <section id="s-teacher" class="screen">
+    <div class="sec-title">선생님 화면 <span class="phasebadge lobby" id="phaseBadge">대기실</span><span class="small">학생 입장과 제작 현황이 실시간으로 보여요</span></div>
+    <div class="tsec"><h3>📲 학생 입장 QR</h3>
+      <div class="qrbox"><div id="qr"></div>
+        <div class="qrinfo">휴대폰 카메라로 QR을 스캔하면 입장 화면으로 들어와요.<div class="url" id="siteUrl"></div></div></div>
+      <div class="warn" id="qrWarn" style="display:none">⚠️ 아직 인터넷에 배포되지 않은 주소예요. GitHub/Vercel에 올린 뒤 그 주소로 열면 QR이 정상 작동합니다.</div>
+    </div>
+    <div class="tsec"><h3>👥 입장 현황 · <span id="joinNum" style="color:var(--gold)">0</span>명</h3>
+      <div class="namechips" id="nameChips"></div>
+      <button class="btn gold" style="margin-top:14px" id="startBtn" onclick="teacherStart()">🚀 캐릭터 제작 시작!</button>
+      <p style="text-align:center;color:var(--muted);font-size:12px;margin:8px 0 0">다 들어온 걸 확인하고 누르면, 모든 학생 화면이 제작으로 넘어가요.</p>
+    </div>
+    <div class="tsec"><h3>🛠 제작 현황</h3>
+      <div class="counts">
+        <div class="ccard making"><div class="n" id="c-making">0</div><div class="l">만드는 중</div></div>
+        <div class="ccard ready"><div class="n" id="c-ready">0</div><div class="l">완성 ✓</div></div>
+        <div class="ccard done"><div class="n" id="c-done">0</div><div class="l">전투 완료</div></div>
+      </div>
+      <div class="ggrid" id="dashGrid"></div>
+      <button class="btn gold" style="margin-top:14px" onclick="teacherBattle()">⚔️ 싸움 시작!</button>
+      <p style="text-align:center;color:var(--muted);font-size:12px;margin:8px 0 0">모두 "완성 ✓" 되면 누르세요. 모든 학생의 전투가 동시에 시작돼요.</p>
+    </div>
+    <div class="row2">
+      <button class="btn ghost" onclick="teacherReset()">🧹 현황 초기화</button>
+      <button class="btn ghost" onclick="leaveTeacher()">← 나가기</button>
+    </div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========== ⚙️ 설정: 아래 두 줄에 Supabase 키를 붙여넣으세요 (설치 가이드 참고) ========== */
+const SUPABASE_URL = "";          // 예: https://abcd1234.supabase.co
+const SUPABASE_ANON_KEY = "";     // 예: eyJhbGciOi...
+/* ===================================================================================== */
+
+const POINTS=100, ROOM='room';
+const MONSTER={hp:90,attack:24,def:8};
+const FIXED_SKIN="#f7d3b0", FIXED_HAIR="#2a2438";
+const PAL_OUTFIT=["#e0443a","#3b6fe5","#2ca579","#8a5cf0","#f2b134","#ef6fa7","#2a2a3a","#e8e8f0"];
+function colName(hex){const m={"#e0443a":"빨강","#3b6fe5":"파랑","#2ca579":"초록","#8a5cf0":"보라","#f2b134":"노랑","#ef6fa7":"분홍","#2a2a3a":"검정","#e8e8f0":"하양"};return m[hex]||hex;}
+
+let state={id:null,name:"",job:"전사",look:{outfit:"#3b6fe5"},stats:{hp:0,attack:0,defense:0},status:"lobby",result:null};
+
+/* ---------- backend (Supabase + local fallback) ---------- */
+let sb=null, useSB=false, localRows={}, localPhase='lobby';
+function initBackend(){try{if(SUPABASE_URL&&SUPABASE_ANON_KEY&&window.supabase){sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);useSB=true;}}catch(e){useSB=false;}}
+async function savePresence(){
+  const rec={id:state.id,name:state.name||'(이름없음)',job:state.job,outfit:state.look.outfit,
+    hp:state.stats.hp,attack:state.stats.attack,defense:state.stats.defense,status:state.status,result:state.result,ts:Date.now()};
+  localRows[state.id]=rec;
+  if(useSB){try{await sb.from('presence').upsert(rec);}catch(e){}}
+}
+async function fetchPresence(){
+  if(useSB){try{const{data}=await sb.from('presence').select('*');return data||[];}catch(e){return Object.values(localRows);}}
+  return Object.values(localRows);
+}
+async function getPhase(){
+  if(useSB){try{const{data}=await sb.from('session').select('phase').eq('id',ROOM).maybeSingle();return data?data.phase:'lobby';}catch(e){return localPhase;}}
+  return localPhase;
+}
+async function setPhase(p){localPhase=p;if(useSB){try{await sb.from('session').upsert({id:ROOM,phase:p});}catch(e){}}}
+async function clearAll(){localRows={};localPhase='lobby';if(useSB){try{await sb.from('presence').delete().neq('id','___none___');await sb.from('session').upsert({id:ROOM,phase:'lobby'});}catch(e){}}}
+
+/* ---------- character SVG ---------- */
+function darken(hex,f){f=f||.62;const n=parseInt(hex.slice(1),16);let r=(n>>16)&255,g=(n>>8)&255,b=n&255;return '#'+((1<<24)+(Math.round(r*f)<<16)+(Math.round(g*f)<<8)+Math.round(b*f)).toString(16).slice(1);}
+function weaponSVG(job){
+  if(job==="마법사")return '<g><circle cx="95" cy="40" r="11" fill="#7fd6ff" opacity=".35"/><circle cx="95" cy="40" r="7" fill="#aee9ff"/><rect x="92" y="46" width="5" height="74" rx="2" fill="#7a5230"/></g>';
+  if(job==="궁수")return '<g fill="none"><path d="M96,34 Q116,72 96,112" stroke="#8a5a2b" stroke-width="5"/><line x1="96" y1="34" x2="96" y2="112" stroke="#d8d8e0" stroke-width="1.5"/></g>';
+  if(job==="도적")return '<g><rect x="90" y="66" width="5" height="26" rx="2" fill="#d3d7e2"/><polygon points="90,66 95,66 92.5,58" fill="#eef0f7"/><rect x="86" y="92" width="13" height="4" rx="2" fill="#8a6a3a"/><rect x="90" y="96" width="5" height="11" rx="2" fill="#5a3c22"/></g>';
+  return '<g><rect x="89" y="40" width="6" height="56" rx="2" fill="#d3d7e2"/><polygon points="89,40 95,40 92,30" fill="#eef0f7"/><rect x="82" y="96" width="20" height="5" rx="2" fill="#8a6a3a"/><rect x="89" y="101" width="6" height="14" rx="2" fill="#5a3c22"/></g>';
+}
+function buildChar(outfit,job){
+  const o2=darken(outfit);
+  return `<svg viewBox="0 0 130 165" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="62" cy="158" rx="34" ry="6" fill="#000" opacity=".22"/>
+    <rect x="49" y="118" width="15" height="36" rx="7" fill="${o2}"/><rect x="61" y="118" width="15" height="36" rx="7" fill="${o2}"/>
+    <ellipse cx="55" cy="155" rx="9" ry="5" fill="#2c2740"/><ellipse cx="70" cy="155" rx="9" ry="5" fill="#2c2740"/>
+    <rect x="34" y="84" width="13" height="36" rx="6" fill="${FIXED_SKIN}"/><rect x="34" y="84" width="13" height="15" rx="6" fill="${outfit}"/>
+    <rect x="40" y="76" width="44" height="50" rx="17" fill="${outfit}"/><rect x="40" y="112" width="44" height="7" fill="${o2}"/>
+    ${weaponSVG(job)}
+    <rect x="78" y="84" width="13" height="34" rx="6" fill="${FIXED_SKIN}"/><rect x="78" y="84" width="13" height="15" rx="6" fill="${outfit}"/>
+    <circle cx="62" cy="50" r="30" fill="${FIXED_SKIN}"/>
+    <path d="M33,52 Q33,20 62,20 Q91,20 91,52 Q78,37 62,37 Q46,37 33,52 Z" fill="${FIXED_HAIR}"/>
+    <ellipse cx="51" cy="53" rx="4" ry="5.5" fill="#241f33"/><ellipse cx="73" cy="53" rx="4" ry="5.5" fill="#241f33"/>
+    <circle cx="52.4" cy="51" r="1.3" fill="#fff"/><circle cx="74.4" cy="51" r="1.3" fill="#fff"/>
+    <ellipse cx="47" cy="62" rx="4" ry="2.4" fill="#ff9eb0" opacity=".55"/><ellipse cx="77" cy="62" rx="4" ry="2.4" fill="#ff9eb0" opacity=".55"/>
+    <path d="M56,64 Q62,69 68,64" stroke="#9a6a52" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+}
+function buildGoblin(){
+  return `<svg viewBox="0 0 130 150" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="64" cy="146" rx="32" ry="6" fill="#000" opacity=".22"/>
+    <rect x="50" y="112" width="13" height="26" rx="6" fill="#4f8a2e"/><rect x="66" y="112" width="13" height="26" rx="6" fill="#4f8a2e"/>
+    <ellipse cx="64" cy="96" rx="32" ry="27" fill="#6cae3e"/><ellipse cx="64" cy="100" rx="20" ry="17" fill="#8fc95e"/>
+    <rect x="86" y="70" width="12" height="34" rx="6" fill="#6cae3e"/>
+    <g><rect x="20" y="58" width="11" height="40" rx="5" fill="#6cae3e"/><ellipse cx="25" cy="50" rx="15" ry="13" fill="#7a5a3a"/><circle cx="20" cy="46" r="4" fill="#5a4329"/><circle cx="31" cy="52" r="4" fill="#5a4329"/><circle cx="22" cy="56" r="3.5" fill="#5a4329"/></g>
+    <circle cx="64" cy="52" r="27" fill="#6cae3e"/>
+    <polygon points="40,46 16,30 42,60" fill="#5e9a35"/><polygon points="88,46 112,30 86,60" fill="#5e9a35"/>
+    <polygon points="40,46 26,36 42,56" fill="#7bc04c"/><polygon points="88,46 102,36 86,56" fill="#7bc04c"/>
+    <path d="M44,40 L58,46" stroke="#3d6024" stroke-width="3" stroke-linecap="round"/><path d="M84,40 L70,46" stroke="#3d6024" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="53" cy="52" rx="7" ry="6" fill="#ffe96b"/><ellipse cx="75" cy="52" rx="7" ry="6" fill="#ffe96b"/>
+    <circle cx="54" cy="53" r="3" fill="#1c1c1c"/><circle cx="74" cy="53" r="3" fill="#1c1c1c"/>
+    <path d="M50,66 Q64,74 78,66 L74,66 L70,72 L66,66 L62,72 L58,66 L54,68 Z" fill="#3d2a1a"/>
+    <polygon points="58,66 62,66 60,73" fill="#fff"/></svg>`;
+}
+
+/* ---------- nav ---------- */
+function go(id){
+  if(id!=='teacher')stopTeacher();
+  if(id!=='lobby')stopLobby();
+  if(id!=='input'&&id!=='wait')stopPhaseWatch();
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('s-'+id).classList.add('on');
+  document.getElementById('wrap').classList.toggle('wide',id==='teacher');
+  window.scrollTo({top:0});
+}
+
+/* ---------- join + lobby ---------- */
+async function joinRoom(){
+  const nm=document.getElementById('joinName').value.trim();
+  if(!nm){toast('이름을 입력해주세요');return;}
+  state.name=nm; state.status='lobby'; savePresence();
+  document.getElementById('lobbyName').textContent=nm;
+  const p=await getPhase();
+  if(p==='create'||p==='battle') enterCreate(); else enterLobby();
+}
+let lobbyTimer=null;
+async function enterLobby(){
+  go('lobby');
+  const check=async()=>{const p=await getPhase();if(p==='create'||p==='battle'){stopLobby();enterCreate();}};
+  await check();
+  lobbyTimer=setInterval(check,3000);
+}
+function stopLobby(){if(lobbyTimer){clearInterval(lobbyTimer);lobbyTimer=null;}}
+function enterCreate(){
+  buildSwatches();renderPreview();state.status='making';savePresence();refreshFight();go('input');startPhaseWatch();
+}
+
+/* ---------- swatches + preview ---------- */
+function buildSwatches(){const box=document.getElementById('sw-outfit');box.innerHTML='';
+  PAL_OUTFIT.forEach(c=>{const d=document.createElement('div');d.className='sw'+(state.look.outfit===c?' sel':'');d.style.background=c;
+    d.onclick=()=>{state.look.outfit=c;[...box.children].forEach(x=>x.classList.remove('sel'));d.classList.add('sel');renderPreview();savePresence();};box.appendChild(d);});}
+function renderPreview(){document.getElementById('preview').innerHTML=buildChar(state.look.outfit,state.job);}
+
+document.getElementById('jobs').addEventListener('click',e=>{const j=e.target.closest('.job');if(!j)return;
+  document.querySelectorAll('.job').forEach(x=>x.classList.remove('sel'));j.classList.add('sel');state.job=j.dataset.job;renderPreview();savePresence();});
+function spent(){return state.stats.hp+state.stats.attack+state.stats.defense;}
+function adj(stat,d){const cur=state.stats[stat],nx=cur+d;if(nx<0)return;if(spent()-cur+nx>POINTS)return;
+  state.stats[stat]=nx;document.getElementById('v-'+stat).textContent=nx;document.getElementById('b-'+stat).style.width=nx+'%';
+  const left=POINTS-spent();const el=document.getElementById('left');el.innerHTML=left+'<small> 남음</small>';el.classList.toggle('zero',left===0);
+  state.status=(spent()===POINTS)?'ready':'making';refreshFight();savePresence();}
+function refreshFight(){const ready=spent()===POINTS;document.getElementById('fightBtn').disabled=!ready;
+  document.getElementById('hint').textContent=ready?'다 됐어요! "준비 완료"를 누르고 기다리세요':"남은 점수를 0으로 만들면 준비할 수 있어요";}
+
+/* ---------- ready & battle-phase watch (teacher controls start) ---------- */
+let phaseTimer=null;
+function canFight(){return spent()===POINTS;}
+function startPhaseWatch(){stopPhaseWatch();phaseTimer=setInterval(async()=>{const p=await getPhase();if(p==='battle'&&canFight()){stopPhaseWatch();startBattle();}},2500);}
+function stopPhaseWatch(){if(phaseTimer){clearInterval(phaseTimer);phaseTimer=null;}}
+async function readyUp(){if(!canFight())return;state.status='ready';savePresence();
+  document.getElementById('wait-avatar').innerHTML=buildChar(state.look.outfit,state.job);
+  go('wait');const p=await getPhase();if(p==='battle'){stopPhaseWatch();startBattle();}}
+
+/* ---------- battle ---------- */
+function startBattle(){
+  stopPhaseWatch();go('battle');state.status='ready';savePresence();
+  document.getElementById('me-name').textContent=state.name;document.getElementById('me-job').textContent=state.job;
+  document.getElementById('art-me').innerHTML=buildChar(state.look.outfit,state.job);document.getElementById('art-foe').innerHTML=buildGoblin();
+  let cMax=state.stats.hp||1,mMax=MONSTER.hp;setHp('me',state.stats.hp,cMax);setHp('foe',MONSTER.hp,mMax);
+  document.getElementById('log').innerHTML='';document.getElementById('verdict').style.display='none';document.getElementById('toResult').style.display='none';
+  const turns=[];let cc=state.stats.hp,cm=MONSTER.hp,t=0;
+  while(cc>0&&cm>0&&t<60){t++;const dM=Math.max(1,state.stats.attack-MONSTER.def);cm-=dM;turns.push({who:'me',dmg:dM,cHp:cc,mHp:Math.max(0,cm)});
+    if(cm<=0)break;const dC=Math.max(1,MONSTER.attack-state.stats.defense);cc-=dC;turns.push({who:'foe',dmg:dC,cHp:Math.max(0,cc),mHp:cm});}
+  const win=cm<=0;state.result=win?'win':'lose';
+  const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;let i=0;
+  function step(){if(i>=turns.length){finish(win,cMax,mMax);return;}
+    const tn=turns[i++],atk=tn.who==='me'?'me':'foe',def=tn.who==='me'?'foe':'me',aArt=document.getElementById('art-'+atk);
+    aArt.classList.add(atk==='me'?'lungeR':'lungeL');
+    setTimeout(()=>{hurt(def,tn.dmg);setHp('me',tn.cHp,cMax);setHp('foe',tn.mHp,mMax);
+      addLog(tn.who==='me'?`${state.name}의 공격! <span class="r">${tn.dmg}</span> 피해`:`고블린의 반격! <span class="r">${tn.dmg}</span> 피해`);},reduce?20:170);
+    setTimeout(()=>{aArt.classList.remove('lungeR','lungeL');step();},reduce?60:760);}
+  setTimeout(step,reduce?40:450);
+}
+function hurt(who,dmg){const art=document.getElementById('art-'+who),flash=document.getElementById('flash-'+who);
+  art.classList.remove('shake');void art.offsetWidth;art.classList.add('shake');
+  flash.classList.remove('on');void flash.offsetWidth;flash.classList.add('on');const bf=art.parentElement;
+  const dn=document.createElement('div');dn.className='dmgnum';dn.textContent='-'+dmg;bf.appendChild(dn);void dn.offsetWidth;dn.classList.add('go');setTimeout(()=>dn.remove(),950);
+  const ou=document.createElement('div');ou.className='ouch';ou.textContent=dmg>=15?'끄악!':'아야!';bf.appendChild(ou);void ou.offsetWidth;ou.classList.add('go');setTimeout(()=>ou.remove(),850);}
+function setHp(who,val,max){const pct=Math.max(0,Math.min(100,val/max*100));document.getElementById(who+'-hp').style.width=pct+'%';document.getElementById(who+'-hp-num').textContent=Math.max(0,Math.round(val))+' / '+max;}
+function addLog(html){const log=document.getElementById('log');const p=document.createElement('p');p.innerHTML=html;log.appendChild(p);log.scrollTop=log.scrollHeight;}
+function finish(win,cMax,mMax){
+  document.getElementById('art-'+(win?'foe':'me')).classList.add('faint');document.getElementById('art-'+(win?'me':'foe')).classList.add('cheer');
+  const v=document.getElementById('verdict');v.style.display='block';v.className='verdict '+(win?'win':'lose');
+  v.querySelector('.big').textContent=win?'승리! 🎉':'패배… 💀';
+  v.querySelector('p').textContent=win?'능력치를 잘 나눴구나! 균형이 승리를 만들었어.':'한 곳에 너무 몰빵했나? 다음엔 골고루 나눠보자.';
+  document.getElementById('toResult').style.display='flex';
+  document.getElementById('r-avatar').innerHTML=buildChar(state.look.outfit,state.job);
+  document.getElementById('r-name').textContent=state.name;document.getElementById('r-job').textContent=state.job;
+  document.getElementById('r-stats').textContent=`${state.stats.hp} / ${state.stats.attack} / ${state.stats.defense}`;
+  document.getElementById('r-look').textContent=colName(state.look.outfit);
+  const rr=document.getElementById('r-result');rr.textContent=win?'승리 🏆':'패배';rr.style.color=win?'var(--gold)':'#ff7a7a';
+  state.status='done';savePresence();
+}
+
+/* ---------- code (Python) ---------- */
+function pyName(s,fb){if(!s)return fb;let t=s.trim().replace(/[^0-9A-Za-z_\uAC00-\uD7A3]/g,'');if(!t)return fb;if(/^[0-9]/.test(t))t='_'+t;return t;}
+function genCode(){const v=pyName(state.name,'내캐릭터'),oc=colName(state.look.outfit);
+return `class Character:
+    def __init__(self, name, job, hp, attack, defense, outfit):
+        self.name = name
+        self.job = job
+        self.hp = hp
+        self.attack = attack
+        self.defense = defense
+        self.outfit = outfit
+
+    def 공격하다(self):
+        pass
+
+    def 회복하다(self):
+        pass
+
+
+# 내 캐릭터 만들기 (인스턴스)
+${v} = Character("${state.name}", "${state.job}", ${state.stats.hp}, ${state.stats.attack}, ${state.stats.defense}, "${oc}")`;}
+function hl(code){let s=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s=s.replace(/(#[^\n]*)/g,'<span class="cm">$1</span>');s=s.replace(/\b(class|def|pass)\b/g,'<span class="kw">$1</span>');
+  s=s.replace(/\bself\b/g,'<span class="self">self</span>');s=s.replace(/("[^"]*")/g,'<span class="str">$1</span>');
+  s=s.replace(/\b(\d+)\b/g,'<span class="num">$1</span>');s=s.replace(/(def )(공격하다|회복하다|__init__)/g,'$1<span class="fn">$2</span>');return s;}
+function renderCode(){document.getElementById('codeOut').innerHTML=hl(genCode());}
+function copyCode(){navigator.clipboard.writeText(genCode()).then(()=>toast('코드를 복사했어요!')).catch(()=>toast('길게 눌러 복사하세요'));}
+
+/* ---------- teacher ---------- */
+let teacherTimer=null, qrDrawn=false;
+function openTeacher(){
+  go('teacher');
+  const url=location.href.split('#')[0];
+  document.getElementById('siteUrl').textContent=url;
+  if(location.protocol==='file:'||location.hostname==='localhost')document.getElementById('qrWarn').style.display='block';
+  if(!qrDrawn&&window.QRCode){try{new QRCode(document.getElementById('qr'),{text:url,width:170,height:170,correctLevel:QRCode.CorrectLevel.M});qrDrawn=true;}catch(e){}}
+  loadTeacher();teacherTimer=setInterval(loadTeacher,4000);
+}
+function stopTeacher(){if(teacherTimer){clearInterval(teacherTimer);teacherTimer=null;}}
+function leaveTeacher(){stopTeacher();go('join');}
+async function teacherStart(){await setPhase('create');toast('제작을 시작했어요! 🚀');document.getElementById('phaseBadge').textContent='제작 중';document.getElementById('phaseBadge').className='phasebadge create';}
+async function teacherBattle(){await setPhase('battle');toast('싸움을 시작했어요! ⚔️');document.getElementById('phaseBadge').textContent='전투 중';document.getElementById('phaseBadge').className='phasebadge battle';}
+async function teacherReset(){if(!confirm('모든 학생 현황을 지우고 대기실로 되돌릴까요?'))return;await clearAll();toast('초기화했어요');loadTeacher();document.getElementById('phaseBadge').textContent='대기실';document.getElementById('phaseBadge').className='phasebadge lobby';}
+async function loadTeacher(){
+  const rows=await fetchPresence();rows.sort((a,b)=>(a.ts||0)-(b.ts||0));
+  document.getElementById('joinNum').textContent=rows.length;
+  document.getElementById('nameChips').innerHTML=rows.length?rows.map(r=>`<span class="nchip">${esc(r.name)}</span>`).join(''):'<span style="color:var(--muted);font-size:13px">아직 입장한 학생이 없어요.</span>';
+  const c={making:0,ready:0,done:0};rows.forEach(r=>{if(c[r.status]!==undefined)c[r.status]++;});
+  document.getElementById('c-making').textContent=c.making;document.getElementById('c-ready').textContent=c.ready;document.getElementById('c-done').textContent=c.done;
+  const made=rows.filter(r=>r.status!=='lobby');
+  document.getElementById('dashGrid').innerHTML=made.length?made.map(r=>`<div class="gcard"><span class="badge ${r.status}">${r.status==='done'?(r.result==='win'?'승리':'완료'):(r.status==='ready'?'완성':'제작중')}</span>
+    ${buildChar(r.outfit||'#3b6fe5',r.job)}<div class="gname">${esc(r.name)}</div><div class="gjob">${esc(r.job)}</div>
+    <div class="gstats"><span class="h">❤️${r.hp}</span><span class="a">🔥${r.attack}</span><span class="d">🛡️${r.defense}</span></div>
+    ${r.status==='done'?`<div class="gres ${r.result==='win'?'w':'l'}">${r.result==='win'?'승리 🏆':'패배'}</div>`:''}</div>`).join(''):'<div class="empty">제작을 시작하면 학생 캐릭터가 여기 떠요.</div>';
+}
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---------- misc ---------- */
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+function resetAll(){const id=state.id;state={id:id,name:state.name,job:"전사",look:{outfit:"#3b6fe5"},stats:{hp:0,attack:0,defense:0},status:"ready",result:null};
+  ['hp','attack','defense'].forEach(s=>{document.getElementById('v-'+s).textContent='0';document.getElementById('b-'+s).style.width='0%';});
+  document.querySelectorAll('.job').forEach(x=>x.classList.remove('sel'));document.querySelector('.job[data-job="전사"]').classList.add('sel');
+  document.getElementById('left').innerHTML='100<small> 남음</small>';document.getElementById('left').classList.remove('zero');
+  buildSwatches();renderPreview();refreshFight();enterCreate();}
+
+/* ---------- init ---------- */
+(function(){
+  state.id='d'+Math.random().toString(36).slice(2,9);
+  try{const saved=localStorage.getItem('cm_id');if(saved)state.id=saved;else localStorage.setItem('cm_id',state.id);}catch(e){}
+  initBackend();
+})();
+</script>
+</body>
+</html>

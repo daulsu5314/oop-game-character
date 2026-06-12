@@ -5,26 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>클래스 메이커 · 캐릭터 소환</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{--bg:#13122a;--bg2:#1b1a3a;--surface:#23224a;--surface2:#2c2b58;--line:#3a3970;--ink:#edeefb;--muted:#9fa0d4;
     --hp:#3fd68c;--atk:#ff7e54;--def:#5b8def;--violet:#a487ff;--gold:#ffd24a;--shadow:0 10px 30px rgba(0,0,0,.4);}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;padding:0}
-  body{background:radial-gradient(1200px 600px at 50% -10%,#2a2860 0%,var(--bg) 55%) fixed;color:var(--ink);font-family:'Noto Sans KR',system-ui,sans-serif;min-height:100vh;line-height:1.6;overflow-x:hidden}
+  body{background:radial-gradient(1200px 600px at 50% -10%,#2a2860 0%,var(--bg) 55%) fixed;color:var(--ink);font-family:'Galmuri11',system-ui,sans-serif;min-height:100vh;line-height:1.6;overflow-x:hidden}
   .stars{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(1.4px 1.4px at 20% 30%,#fff5 50%,transparent),radial-gradient(1.2px 1.2px at 70% 60%,#fff4 50%,transparent),radial-gradient(1.6px 1.6px at 40% 80%,#fff3 50%,transparent),radial-gradient(1.2px 1.2px at 85% 20%,#fff4 50%,transparent),radial-gradient(1.3px 1.3px at 12% 70%,#fff3 50%,transparent)}
   .wrap{position:relative;z-index:1;max-width:580px;margin:0 auto;padding:20px 18px 40px;min-height:100vh;display:flex;flex-direction:column}
   .wrap.wide{max-width:920px}
   .screen{display:none;animation:fade .35s ease}.screen.on{display:block}
   @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:reduce){.screen{animation:none}}
-  .display{font-family:'Black Han Sans',sans-serif;letter-spacing:.5px;line-height:1.1}
+  .display{font-family:'Galmuri11',sans-serif;letter-spacing:.5px;line-height:1.1}
   .eyebrow{font-size:12px;letter-spacing:3px;color:var(--violet);font-weight:700;text-transform:uppercase}
-  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font-family:'Black Han Sans',sans-serif;font-size:19px;letter-spacing:1px;color:#161430;background:linear-gradient(180deg,#b9a2ff,var(--violet));border:none;border-radius:16px;padding:16px;cursor:pointer;box-shadow:var(--shadow);transition:transform .12s,filter .12s}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font-family:'Galmuri11',sans-serif;font-size:19px;letter-spacing:1px;color:#161430;background:linear-gradient(180deg,#b9a2ff,var(--violet));border:none;border-radius:16px;padding:16px;cursor:pointer;box-shadow:var(--shadow);transition:transform .12s,filter .12s}
   .btn:hover{filter:brightness(1.06)}.btn:active{transform:translateY(2px)}
   .btn:disabled{filter:grayscale(.7) brightness(.7);cursor:not-allowed;box-shadow:none}
   .btn.gold{background:linear-gradient(180deg,#ffe48a,var(--gold))}
-  .btn.ghost{background:transparent;color:var(--muted);border:1.5px solid var(--line);box-shadow:none;font-size:15px;font-family:'Noto Sans KR';font-weight:700}
+  .btn.ghost{background:transparent;color:var(--muted);border:1.5px solid var(--line);box-shadow:none;font-size:15px;font-family:'Galmuri11';font-weight:700}
   .btn:focus-visible{outline:3px solid #fff;outline-offset:2px}
   input[type=text]{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:15px;color:var(--ink);font-size:17px;font-family:inherit}
   input[type=text]:focus{outline:none;border-color:var(--violet)}
@@ -40,15 +40,15 @@
   .lobby{text-align:center;margin-top:9vh}
   .lobby .spin{font-size:54px;animation:bob 1.6s ease-in-out infinite}
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-  .lobby h2{font-family:'Black Han Sans';font-size:26px;color:#fff;margin:14px 0 6px}
+  .lobby h2{font-family:'Galmuri11';font-size:26px;color:#fff;margin:14px 0 6px}
   .lobby .who{color:var(--violet);font-weight:800}
   .lobby p{color:var(--muted);max-width:300px;margin:6px auto}
   .dots span{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--violet);margin:0 3px;animation:blink 1.4s infinite}
   .dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
   @keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
 
-  .sec-title{font-family:'Black Han Sans';font-size:24px;color:#fff;margin:2px 0 14px}
-  .sec-title .small{font-family:'Noto Sans KR';font-size:13px;color:var(--muted);font-weight:500;display:block;letter-spacing:0}
+  .sec-title{font-family:'Galmuri11';font-size:24px;color:#fff;margin:2px 0 14px}
+  .sec-title .small{font-family:'Galmuri11';font-size:13px;color:var(--muted);font-weight:500;display:block;letter-spacing:0}
   label.fld{display:block;font-weight:700;font-size:14px;margin:16px 0 8px}
   .jobs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
   .job{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:10px 4px;text-align:center;cursor:pointer;transition:.15s;font-size:12px;font-weight:700;color:var(--muted)}
@@ -61,14 +61,14 @@
   .sw{width:30px;height:30px;border-radius:8px;cursor:pointer;border:2px solid transparent;box-shadow:inset 0 0 0 1px #0003}
   .sw.sel{border-color:#fff;transform:scale(1.08)}
   .points{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 6px}
-  .points .lab{font-weight:700;font-size:14px}.points .left{font-family:'Black Han Sans';font-size:30px;color:var(--gold)}
-  .points .left.zero{color:var(--hp)}.points .left small{font-size:13px;color:var(--muted);font-family:'Noto Sans KR'}
+  .points .lab{font-weight:700;font-size:14px}.points .left{font-family:'Galmuri11';font-size:30px;color:var(--gold)}
+  .points .left.zero{color:var(--hp)}.points .left small{font-size:13px;color:var(--muted);font-family:'Galmuri11'}
   .stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
   .stat .row{display:flex;align-items:center;gap:10px}.stat .sico{font-size:22px;width:26px;text-align:center}
   .stat .sname{font-weight:700;font-size:15px;flex:1}.stat .sname em{font-style:normal;color:var(--muted);font-size:12px;font-weight:500}
   .stepper{display:flex;align-items:center;background:var(--bg2);border-radius:10px;overflow:hidden;border:1px solid var(--line)}
-  .stepper button{width:38px;height:38px;border:none;background:transparent;color:#fff;font-size:22px;font-family:'Black Han Sans';cursor:pointer}
-  .stepper button:active{background:#ffffff22}.stepper .val{min-width:42px;text-align:center;font-family:'Black Han Sans';font-size:20px}
+  .stepper button{width:38px;height:38px;border:none;background:transparent;color:#fff;font-size:22px;font-family:'Galmuri11';cursor:pointer}
+  .stepper button:active{background:#ffffff22}.stepper .val{min-width:42px;text-align:center;font-family:'Galmuri11';font-size:20px}
   .bar{height:8px;border-radius:6px;background:#ffffff14;margin-top:10px;overflow:hidden}.bar>i{display:block;height:100%;border-radius:6px;transition:width .25s}
   .stat.hp .bar>i{background:var(--hp)}.stat.atk .bar>i{background:var(--atk)}.stat.def .bar>i{background:var(--def)}
   .stat.hp .sico{color:var(--hp)}.stat.atk .sico{color:var(--atk)}.stat.def .sico{color:var(--def)}
@@ -81,8 +81,8 @@
   .art{position:relative;width:120px;height:160px;display:flex;align-items:flex-end;justify-content:center}
   .art svg{width:108px;height:auto;filter:drop-shadow(0 8px 6px #0006)}
   .flash{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,#ff4d4d 0%,transparent 65%);opacity:0;pointer-events:none}
-  .dmgnum{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-family:'Black Han Sans';font-size:26px;color:#ff5a5a;text-shadow:0 2px 0 #5a0000;pointer-events:none}
-  .ouch{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-family:'Black Han Sans';font-size:15px;color:#fff;background:#e0443a;padding:2px 9px;border-radius:10px;white-space:nowrap;opacity:0;pointer-events:none}
+  .dmgnum{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-family:'Galmuri11';font-size:26px;color:#ff5a5a;text-shadow:0 2px 0 #5a0000;pointer-events:none}
+  .ouch{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-family:'Galmuri11';font-size:15px;color:#fff;background:#e0443a;padding:2px 9px;border-radius:10px;white-space:nowrap;opacity:0;pointer-events:none}
   @keyframes dmgFloat{0%{opacity:0;transform:translate(-50%,6px) scale(.6)}20%{opacity:1;transform:translate(-50%,-4px) scale(1.15)}100%{opacity:0;transform:translate(-50%,-40px) scale(1)}}
   @keyframes ouchPop{0%{opacity:0;transform:translate(-50%,4px)}25%{opacity:1;transform:translate(-50%,-6px)}80%{opacity:1;transform:translate(-50%,-8px)}100%{opacity:0;transform:translate(-50%,-14px)}}
   @keyframes flashAnim{0%{opacity:0}30%{opacity:.85}100%{opacity:0}}
@@ -99,29 +99,29 @@
   .hpbar{height:11px;background:#0006;border-radius:7px;overflow:hidden;border:1px solid #ffffff1a}
   .hpbar>i{display:block;height:100%;background:linear-gradient(90deg,var(--hp),#9bf3c6);transition:width .35s}
   .hpbar.foe>i{background:linear-gradient(90deg,#ff6b6b,#ffb199)}
-  .vsbadge{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:'Black Han Sans';color:var(--gold);font-size:20px;z-index:3}
+  .vsbadge{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:'Galmuri11';color:var(--gold);font-size:20px;z-index:3}
   .log{background:#0e0d22;border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:12px 0;height:96px;overflow-y:auto;font-size:13px}
   .log p{margin:4px 0;color:var(--muted);animation:fade .2s}.log p .r{color:var(--atk);font-weight:700}
-  .verdict{text-align:center;margin:10px 0}.verdict .big{font-family:'Black Han Sans';font-size:42px}
+  .verdict{text-align:center;margin:10px 0}.verdict .big{font-family:'Galmuri11';font-size:42px}
   .verdict.win .big{color:var(--gold)}.verdict.lose .big{color:#ff7a7a}.verdict p{color:var(--muted);margin:2px 0 0;font-size:13px}
 
   /* RESULT */
-  .reveal-lead{text-align:center;margin:6px 0 18px}.reveal-lead .big{font-family:'Black Han Sans';font-size:25px;color:#fff}.reveal-lead .big .vio{color:var(--violet)}
+  .reveal-lead{text-align:center;margin:6px 0 18px}.reveal-lead .big{font-family:'Galmuri11';font-size:25px;color:#fff}.reveal-lead .big .vio{color:var(--violet)}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:15px;margin:11px 0}
   .card .ctag{font-size:11px;letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:8px}
   .card.klass .ctag{color:var(--violet)}.card.attr .ctag{color:var(--gold)}.card.method .ctag{color:var(--hp)}.card.inst .ctag{color:var(--def)}
-  .card h3{font-family:'Black Han Sans';font-size:20px;margin:0 0 4px;color:#fff}
+  .card h3{font-family:'Galmuri11';font-size:20px;margin:0 0 4px;color:#fff}
   .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}.chip{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:13px;font-weight:600}
   .kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #ffffff14;font-size:14px}.kv:last-child{border:none}.kv span:first-child{color:var(--muted)}.kv b{color:#fff}
   .inst-head{display:flex;align-items:center;gap:12px}.inst-head svg{width:54px;height:auto}
 
   /* CODE */
-  pre.code{background:#0d0c20;border:1px solid var(--line);border-radius:16px;padding:16px;overflow-x:auto;font-family:'JetBrains Mono','Noto Sans KR',monospace;font-size:12.5px;line-height:1.7;margin:6px 0}
+  pre.code{background:#0d0c20;border:1px solid var(--line);border-radius:16px;padding:16px;overflow-x:auto;font-family:'GalmuriMono11','Galmuri11',monospace;font-size:12.5px;line-height:1.7;margin:6px 0}
   .codewrap{background:#0d0c20;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:6px 0;overflow-x:auto}
   .cblock{border-left:4px solid;padding:4px 0 4px 12px;margin:9px 0}
   .cblock:first-child{margin-top:2px}
   .cblock .clabel{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.5px;margin-bottom:3px}
-  .cblock .cpre{margin:0;background:none;border:none;padding:0;font-family:'JetBrains Mono','Noto Sans KR',monospace;font-size:12.5px;line-height:1.7;white-space:pre;color:#e7e6fb}
+  .cblock .cpre{margin:0;background:none;border:none;padding:0;font-family:'GalmuriMono11','Galmuri11',monospace;font-size:12.5px;line-height:1.7;white-space:pre;color:#e7e6fb}
   .r-class{border-color:var(--violet)} .r-class .clabel{color:var(--violet)}
   .r-attr{border-color:var(--gold)} .r-attr .clabel{color:var(--gold)}
   .r-method{border-color:var(--hp)} .r-method .clabel{color:var(--hp)}
@@ -133,18 +133,18 @@
 
   /* TEACHER */
   .tsec{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
-  .tsec h3{font-family:'Black Han Sans';font-size:18px;margin:0 0 10px;color:#fff}
+  .tsec h3{font-family:'Galmuri11';font-size:18px;margin:0 0 10px;color:#fff}
   .qrbox{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center}
   #qr{background:#fff;padding:10px;border-radius:12px;width:190px;height:190px;object-fit:contain}
   #qr img,#qr canvas{display:block}
   .qrinfo{flex:1;min-width:180px}
-  .qrinfo .url{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--violet);word-break:break-all;background:var(--bg2);padding:8px 10px;border-radius:8px;margin-top:8px}
-  .joincount{font-family:'Black Han Sans';font-size:40px;color:var(--gold);line-height:1}
+  .qrinfo .url{font-family:'GalmuriMono11',monospace;font-size:12px;color:var(--violet);word-break:break-all;background:var(--bg2);padding:8px 10px;border-radius:8px;margin-top:8px}
+  .joincount{font-family:'Galmuri11';font-size:40px;color:var(--gold);line-height:1}
   .namechips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
   .nchip{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:13px;font-weight:600}
   .counts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 0}
   .ccard{border-radius:14px;padding:12px;text-align:center;border:1px solid var(--line)}
-  .ccard .n{font-family:'Black Han Sans';font-size:28px;line-height:1}.ccard .l{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px}
+  .ccard .n{font-family:'Galmuri11';font-size:28px;line-height:1}.ccard .l{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px}
   .ccard.making{background:#2a2750}.ccard.making .n{color:var(--muted)}.ccard.ready{background:#2a3550}.ccard.ready .n{color:var(--gold)}.ccard.done{background:#1e3a32}.ccard.done .n{color:var(--hp)}
   .ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:12px}
   .gcard{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center;position:relative}
@@ -156,13 +156,56 @@
   .gcard .gres{margin-top:4px;font-size:10px;font-weight:800}.gcard .gres.w{color:var(--gold)}.gcard .gres.l{color:#ff7a7a}
   .empty{text-align:center;color:var(--muted);padding:24px 10px;font-size:14px}
   .phasebadge{display:inline-block;font-size:12px;font-weight:800;padding:4px 12px;border-radius:20px;margin-left:8px}
-  .phasebadge.lobby{background:#3a3760;color:#cfd0ee}.phasebadge.create{background:#1f5040;color:var(--hp)}.phasebadge.battle{background:#5a1f2e;color:#ff9a9a}
+  .phasebadge.lobby{background:#3a3760;color:#cfd0ee}.phasebadge.create{background:#1f5040;color:var(--hp)}.phasebadge.battle{background:#5a1f2e;color:#ff9a9a}.phasebadge.end{background:#3a2e1a;color:#ffc07a}
   .tback{display:inline-block;color:var(--violet);font-size:13px;text-decoration:none;border-bottom:1px dashed var(--line);cursor:pointer;margin:-4px 0 12px}
   #wait-avatar svg{width:96px;height:auto}
   .warn{background:#3a2750;border:1px solid #6b4ad6;border-radius:12px;padding:10px 12px;font-size:12.5px;color:#d9cfff;margin-top:10px}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#fff;color:#161430;padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;opacity:0;transition:.3s;z-index:50;box-shadow:var(--shadow)}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.spacer{flex:1}
   .row2{display:flex;gap:10px}
+
+  /* ===== PIXEL THEME ===== */
+  :root{--bg:#15131f;--bg2:#211d33;--surface:#2a2540;--surface2:#352f52;--line:#5b5488;--edge:#0c0a14;--ink:#f3f1ff;--muted:#9d96c9;--hp:#6fd06a;--atk:#ff7a45;--def:#5a92ef;--violet:#b07bff;--gold:#ffd24a;}
+  body{background:var(--bg)!important}
+  svg,#qr,img{image-rendering:pixelated}
+  .stars{background-image:linear-gradient(90deg,#ffffff09 1px,transparent 1px),linear-gradient(#ffffff09 1px,transparent 1px)!important;background-size:18px 18px!important;opacity:.6}
+  .btn,.note,.card,.tsec,.stat,.log,.codewrap,.next,.gcard,.ccard,.preview-wrap,.battlefield,.job,.chip,.nchip,.sortbox,.bank,input[type=text],.stepper,.preview-stage,.toast,.hpbar,.bar,#qr,.phasebadge,.badge,.sw,.verdict,.ref,.dots span{border-radius:0!important}
+  .note,.card,.tsec,.stat,.log,.next,.gcard,.ccard,.preview-wrap,.toast{border:3px solid var(--edge)!important;background-image:none!important;box-shadow:inset 2px 2px 0 #ffffff14,inset -3px -3px 0 #00000055!important}
+  .next{background:#241c3e!important}
+  .preview-stage{background:#171327!important;border:3px solid var(--edge)!important;box-shadow:inset 2px 2px 0 #00000060!important}
+  .battlefield{background:#1a1530!important;border:3px solid var(--edge)!important}
+  .ground{background:#2a2342!important;border-top:3px solid var(--edge)!important}
+  .codewrap{background:#0d0a16!important;border:3px solid var(--edge)!important}
+  .btn{border:3px solid var(--edge)!important;background:var(--violet)!important;color:#1b1030!important;box-shadow:inset 3px 3px 0 #ffffff66,inset -4px -4px 0 #00000055,4px 4px 0 var(--edge)!important;transition:none!important}
+  .btn.gold{background:var(--gold)!important}
+  .btn.ghost{background:var(--surface)!important;color:var(--ink)!important;box-shadow:inset 3px 3px 0 #ffffff1a,inset -4px -4px 0 #00000055,4px 4px 0 var(--edge)!important}
+  .btn:hover{filter:none!important}
+  .btn:active{transform:translate(3px,3px)!important;box-shadow:inset 3px 3px 0 #ffffff44,inset -3px -3px 0 #00000055,1px 1px 0 var(--edge)!important}
+  .btn:disabled{background:#3a3550!important;color:#736d96!important;box-shadow:inset 3px 3px 0 #ffffff10,inset -4px -4px 0 #00000044!important;filter:none!important}
+  input[type=text]{border:3px solid var(--edge)!important;background:#171327!important}
+  .job{border:3px solid var(--edge)!important;background:var(--surface)!important}
+  .job.sel{background:var(--violet)!important;color:#1b1030!important;border-color:var(--edge)!important}
+  .chip,.nchip{border:2px solid var(--edge)!important;background:var(--bg2)!important}
+  .stepper{border:3px solid var(--edge)!important;background:#171327!important}
+  .sw{border:3px solid var(--edge)!important}
+  .sw.sel{outline:3px solid #fff;outline-offset:-1px;transform:none!important}
+  .phasebadge,.badge{border:2px solid var(--edge)!important}
+  .ref{border:2px solid var(--edge)!important;border-radius:0!important;background:var(--surface)!important}
+  .hpbar{background:#0d0a16!important;border:2px solid var(--edge)!important;height:14px!important}
+  .hpbar>i{background:var(--hp)!important;border-radius:0!important;transition:width .15s steps(6)!important}
+  .hpbar.foe>i{background:var(--atk)!important}
+  .bar{background:#0d0a16!important;border:2px solid var(--edge)!important}
+  .bar>i{border-radius:0!important;transition:width .15s steps(6)!important}
+  .cblock{border-radius:0!important}
+  .hero h1,.sec-title,.verdict .big,.gtop h2,.lobby h2,.reveal-lead .big{text-shadow:3px 3px 0 var(--edge)}
+  .vsbadge{text-shadow:2px 2px 0 var(--edge)}
+  #qr{border:3px solid var(--edge)!important}
+  .dots span{border-radius:0!important}
+  .sbsec{padding-top:12px;padding-bottom:12px}
+  .sbhead{display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:14px;font-weight:bold;color:var(--ink)}
+  .sbmini{font-size:11px;font-weight:normal;padding:2px 7px;margin-left:6px;background:var(--bg2);border:2px solid var(--edge);color:var(--muted)}
+  .sbmini.on{color:var(--hp);border-color:var(--hp)}
+  #sbArrow{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -254,7 +297,7 @@
     <div class="reveal-lead"><div class="big">사실 너는 방금<br><span class="vio">객체지향 프로그래밍</span>을 했어!</div></div>
     <div class="card klass"><div class="ctag">클래스 · 설계도</div><h3>Character</h3><p style="color:var(--muted);font-size:13px;margin:2px 0 0">반 친구 모두가 쓴 똑같은 설계도. 여기서 캐릭터를 찍어내요.</p></div>
     <div class="card attr"><div class="ctag">속성 · 가진 상태</div><div class="chips"><span class="chip">이름</span><span class="chip">직업</span><span class="chip">체력</span><span class="chip">공격력</span><span class="chip">방어력</span><span class="chip">옷색</span></div></div>
-    <div class="card method"><div class="ctag">메소드 · 할 수 있는 행동</div><div class="chips"><span class="chip">공격하다()</span><span class="chip">회복하다()</span></div></div>
+    <div class="card method"><div class="ctag">메소드 · 할 수 있는 행동</div><div class="chips"><span class="chip">공격하다()</span><span class="chip">방어하다()</span></div></div>
     <div class="card inst"><div class="ctag">인스턴스 · 내가 만든 실체</div>
       <div class="inst-head"><div id="r-avatar"></div><h3 id="r-name" style="font-size:20px">내 캐릭터</h3></div>
       <div class="kv"><span>직업</span><b id="r-job">-</b></div>
@@ -270,6 +313,7 @@
     <div class="sec-title">파이썬 코드로는?<span class="small">네가 설계한 게 진짜 파이썬 코드가 됐어요</span></div>
     <div class="code codewrap" id="codeOut"></div>
     <button class="btn ghost" onclick="copyCode()">📋 코드 복사하기</button>
+    <button class="btn gold" id="codeEndBtn" style="display:none;margin-top:10px" onclick="teacherEnd()">🏁 수업 종료 — 학생 화면 끄기</button>
     <div class="footer-actions"><button class="btn ghost" id="codeBackBtn" onclick="backHome()">🔄 처음으로</button></div>
   </section>
 
@@ -300,16 +344,36 @@
       <button class="btn gold" style="margin-top:14px" onclick="teacherBattle()">⚔️ 싸우기 시작!</button>
       <p style="text-align:center;color:var(--muted);font-size:12px;margin:8px 0 0">누르면 학생들의 "싸우기" 버튼이 열려요. (선생님 시범 캐릭터도 함께 전투)</p>
     </div>
-    <div class="tsec"><h3>⚙️ 실시간 연결 설정</h3>
-      <div id="sbStatus" style="font-size:13px;margin-bottom:10px"></div>
-      <input type="text" id="sbUrl" placeholder="Supabase Project URL (https://...supabase.co)" style="margin-bottom:8px" autocomplete="off">
-      <input type="text" id="sbKey" placeholder="anon public 키 (eyJ...)" autocomplete="off">
-      <button class="btn ghost" style="margin-top:10px" onclick="saveSupabase()">🔌 연결하기</button>
-      <p style="color:var(--muted);font-size:12px;margin:8px 0 0">⚠️ <b>코드 파일을 고치지 말고 여기에 붙여넣으세요.</b> 비워두면 전투·코드는 작동하지만 여러 기기 현황은 안 모입니다.</p>
+    <div class="tsec sbsec">
+      <div class="sbhead" onclick="toggleSb()">
+        <span>⚙️ 실시간 연결 설정 <span id="sbMini" class="sbmini">미연결</span></span>
+        <span id="sbArrow">▸</span>
+      </div>
+      <div id="sbBody" style="display:none;margin-top:12px">
+        <div id="sbStatus" style="font-size:13px;margin-bottom:10px"></div>
+        <input type="text" id="sbUrl" placeholder="Supabase Project URL (https://...supabase.co)" style="margin-bottom:8px" autocomplete="off">
+        <input type="text" id="sbKey" placeholder="anon public 키 (eyJ...)" autocomplete="off">
+        <button class="btn ghost" style="margin-top:10px" onclick="saveSupabase()">🔌 연결하기</button>
+        <p style="color:var(--muted);font-size:12px;margin:8px 0 0">⚠️ <b>코드 파일을 고치지 말고 여기에 붙여넣으세요.</b> 비워두면 전투·코드는 작동하지만 여러 기기 현황은 안 모입니다.</p>
+      </div>
+    </div>
+    <div class="tsec" style="text-align:center">
+      <button class="btn gold" onclick="teacherEnd()">🏁 수업 종료 — 학생 화면 모두 끄기</button>
+      <p style="color:var(--muted);font-size:12px;margin:8px 0 0">코드까지 보여준 뒤 누르면 모든 학생 화면이 "수업 끝" 화면으로 바뀝니다.</p>
     </div>
     <div class="row2">
       <button class="btn ghost" onclick="teacherReset()">🧹 현황 초기화</button>
       <button class="btn ghost" onclick="leaveTeacher()">← 나가기</button>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section id="s-end" class="screen">
+    <div class="lobby">
+      <div class="spin">🎉</div>
+      <h2 style="margin-top:14px">수업 끝!</h2>
+      <p>오늘도 멋진 캐릭터를 만들었어요.<br>수고했어요! 👏</p>
+      <button class="btn ghost" style="max-width:200px;margin:18px auto 0" onclick="go('join')">처음으로</button>
     </div>
   </section>
 
@@ -344,7 +408,8 @@ function saveSupabase(){
   SB_URL=u;SB_KEY=k;sb=null;useSB=false;initBackend();updateSbStatus();
   toast(useSB?'실시간 연결됐어요! 🔌':'연결 정보를 다시 확인해주세요');
 }
-function updateSbStatus(){const el=document.getElementById('sbStatus');if(!el)return;
+function toggleSb(){var b=document.getElementById('sbBody'),a=document.getElementById('sbArrow');var open=b.style.display==='none';b.style.display=open?'block':'none';if(a)a.textContent=open?'▾':'▸';}
+function updateSbStatus(){var mini=document.getElementById('sbMini');if(mini){mini.textContent=useSB?'연결됨':'미연결';mini.className='sbmini'+(useSB?' on':'');}const el=document.getElementById('sbStatus');if(!el)return;
   el.innerHTML=useSB?'<span style="color:var(--hp)">● 실시간 연결됨 — 여러 기기 현황이 모입니다</span>':'<span style="color:var(--gold)">● 미연결 — 이 기기에서만 동작 (전투·코드는 정상)</span>';}
 async function savePresence(){
   if(IS_TEACHER)return;
@@ -366,49 +431,30 @@ async function clearAll(){localRows={};localPhase='lobby';if(useSB){try{await sb
 
 /* ---------- character SVG ---------- */
 function darken(hex,f){f=f||.62;const n=parseInt(hex.slice(1),16);let r=(n>>16)&255,g=(n>>8)&255,b=n&255;return '#'+((1<<24)+(Math.round(r*f)<<16)+(Math.round(g*f)<<8)+Math.round(b*f)).toString(16).slice(1);}
-function weaponSVG(job){
-  if(job==="마법사")return '<g><circle cx="95" cy="40" r="11" fill="#7fd6ff" opacity=".35"/><circle cx="95" cy="40" r="7" fill="#aee9ff"/><rect x="92" y="46" width="5" height="74" rx="2" fill="#7a5230"/></g>';
-  if(job==="궁수")return '<g fill="none"><path d="M96,34 Q116,72 96,112" stroke="#8a5a2b" stroke-width="5"/><line x1="96" y1="34" x2="96" y2="112" stroke="#d8d8e0" stroke-width="1.5"/></g>';
-  if(job==="도적")return '<g><rect x="90" y="66" width="5" height="26" rx="2" fill="#d3d7e2"/><polygon points="90,66 95,66 92.5,58" fill="#eef0f7"/><rect x="86" y="92" width="13" height="4" rx="2" fill="#8a6a3a"/><rect x="90" y="96" width="5" height="11" rx="2" fill="#5a3c22"/></g>';
-  return '<g><rect x="89" y="40" width="6" height="56" rx="2" fill="#d3d7e2"/><polygon points="89,40 95,40 92,30" fill="#eef0f7"/><rect x="82" y="96" width="20" height="5" rx="2" fill="#8a6a3a"/><rect x="89" y="101" width="6" height="14" rx="2" fill="#5a3c22"/></g>';
+function px(grid,pal){let r='';grid.forEach((row,y)=>{[...row].forEach((ch,x)=>{const c=pal[ch];if(c)r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${c}"/>`;});});return r;}
+function rects(list){return list.map(o=>`<rect x="${o[0]}" y="${o[1]}" width="${o[2]||1}" height="${o[3]||1}" fill="${o[4]}"/>`).join('');}
+const HERO=["................","....kkkkkkkk....","...kkkkkkkkkk...","...kssssssssk...","...kssessessk...","...kssssssssk...","...ksssmmsssk...","......ssss......","...sdooooooods..","...soooooooos...","....oooooooo....","....oddddddo....","....oooooooo....",".....oo..oo.....",".....dd..dd.....",".....dd..dd.....","....bbb..bbb....","................"];
+const GOB=["................","..G........G....","..GG......GG....","..GgG....GgG....","..GggggggggG....","...gggggggggg...","...geggggegg.g..","...gpg.gg.pg.g..","...gggggggggg...","....gmmmmmmg....","....gtggggtg....","...gggggggggg...","..gggggggggggg..","..gGgggggggGg...","...gg....gg.....","...GG....GG.....","..GGG....GGG....","................"];
+function weapon(job){
+  if(job==="마법사")return rects([[13,3,2,2,'#86dbff'],[13.4,4.8,0.8,7,'#7a5230']]);
+  if(job==="궁수")return rects([[13,3,1,1,'#8a5a2b'],[14,4,1,1,'#8a5a2b'],[14,5,1,1,'#8a5a2b'],[14,6,1,1,'#8a5a2b'],[14,7,1,1,'#8a5a2b'],[13,8,1,1,'#8a5a2b'],[13.4,3,0.4,6,'#e6e6ee']]);
+  if(job==="도적")return rects([[13.4,6,0.9,3,'#d8dde8'],[13,8.6,1.8,0.7,'#8a6a3a']]);
+  return rects([[13.4,2.5,0.9,6.5,'#d8dde8'],[12.6,8.3,2.4,0.8,'#8a6a3a'],[13.4,9,0.9,2,'#5a3c22']]);
 }
 function buildChar(outfit,job){
-  const o2=darken(outfit);
-  return `<svg viewBox="0 0 130 165" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="62" cy="158" rx="34" ry="6" fill="#000" opacity=".22"/>
-    <rect x="49" y="118" width="15" height="36" rx="7" fill="${o2}"/><rect x="61" y="118" width="15" height="36" rx="7" fill="${o2}"/>
-    <ellipse cx="55" cy="155" rx="9" ry="5" fill="#2c2740"/><ellipse cx="70" cy="155" rx="9" ry="5" fill="#2c2740"/>
-    <rect x="34" y="84" width="13" height="36" rx="6" fill="${FIXED_SKIN}"/><rect x="34" y="84" width="13" height="15" rx="6" fill="${outfit}"/>
-    <rect x="40" y="76" width="44" height="50" rx="17" fill="${outfit}"/><rect x="40" y="112" width="44" height="7" fill="${o2}"/>
-    ${weaponSVG(job)}
-    <rect x="78" y="84" width="13" height="34" rx="6" fill="${FIXED_SKIN}"/><rect x="78" y="84" width="13" height="15" rx="6" fill="${outfit}"/>
-    <circle cx="62" cy="50" r="30" fill="${FIXED_SKIN}"/>
-    <path d="M33,52 Q33,20 62,20 Q91,20 91,52 Q78,37 62,37 Q46,37 33,52 Z" fill="${FIXED_HAIR}"/>
-    <ellipse cx="51" cy="53" rx="4" ry="5.5" fill="#241f33"/><ellipse cx="73" cy="53" rx="4" ry="5.5" fill="#241f33"/>
-    <circle cx="52.4" cy="51" r="1.3" fill="#fff"/><circle cx="74.4" cy="51" r="1.3" fill="#fff"/>
-    <ellipse cx="47" cy="62" rx="4" ry="2.4" fill="#ff9eb0" opacity=".55"/><ellipse cx="77" cy="62" rx="4" ry="2.4" fill="#ff9eb0" opacity=".55"/>
-    <path d="M56,64 Q62,69 68,64" stroke="#9a6a52" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+  const pal={k:'#3b2f4a',s:'#f2c79a',e:'#20142e',m:'#c56b6b',o:outfit,d:darken(outfit),b:'#2a2740'};
+  return `<svg viewBox="0 0 16 18" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">${px(HERO,pal)}${weapon(job)}</svg>`;
 }
 function buildGoblin(){
-  return `<svg viewBox="0 0 130 150" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="64" cy="146" rx="32" ry="6" fill="#000" opacity=".22"/>
-    <rect x="50" y="112" width="13" height="26" rx="6" fill="#4f8a2e"/><rect x="66" y="112" width="13" height="26" rx="6" fill="#4f8a2e"/>
-    <ellipse cx="64" cy="96" rx="32" ry="27" fill="#6cae3e"/><ellipse cx="64" cy="100" rx="20" ry="17" fill="#8fc95e"/>
-    <rect x="86" y="70" width="12" height="34" rx="6" fill="#6cae3e"/>
-    <g><rect x="20" y="58" width="11" height="40" rx="5" fill="#6cae3e"/><ellipse cx="25" cy="50" rx="15" ry="13" fill="#7a5a3a"/><circle cx="20" cy="46" r="4" fill="#5a4329"/><circle cx="31" cy="52" r="4" fill="#5a4329"/><circle cx="22" cy="56" r="3.5" fill="#5a4329"/></g>
-    <circle cx="64" cy="52" r="27" fill="#6cae3e"/>
-    <polygon points="40,46 16,30 42,60" fill="#5e9a35"/><polygon points="88,46 112,30 86,60" fill="#5e9a35"/>
-    <polygon points="40,46 26,36 42,56" fill="#7bc04c"/><polygon points="88,46 102,36 86,56" fill="#7bc04c"/>
-    <path d="M44,40 L58,46" stroke="#3d6024" stroke-width="3" stroke-linecap="round"/><path d="M84,40 L70,46" stroke="#3d6024" stroke-width="3" stroke-linecap="round"/>
-    <ellipse cx="53" cy="52" rx="7" ry="6" fill="#ffe96b"/><ellipse cx="75" cy="52" rx="7" ry="6" fill="#ffe96b"/>
-    <circle cx="54" cy="53" r="3" fill="#1c1c1c"/><circle cx="74" cy="53" r="3" fill="#1c1c1c"/>
-    <path d="M50,66 Q64,74 78,66 L74,66 L70,72 L66,66 L62,72 L58,66 L54,68 Z" fill="#3d2a1a"/>
-    <polygon points="58,66 62,66 60,73" fill="#fff"/></svg>`;
+  const pal={g:'#6cae3e',G:'#4f8a2e',e:'#ffe96b',p:'#1c1c1c',t:'#ffffff',m:'#2c1f12'};
+  const club=rects([[1,9,2,2,'#7a5a3a'],[1.5,10.5,1,3,'#6b4a2e']]);
+  return `<svg viewBox="0 0 16 18" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">${px(GOB,pal)}${club}</svg>`;
 }
 
 /* ---------- nav ---------- */
 function go(id){
   if(id!=='teacher')stopTeacher();
+  if(id==='join')stopEndWatch();
   if(id!=='lobby'&&id!=='wait')stopPhaseWatch();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById('s-'+id).classList.add('on');
@@ -420,7 +466,7 @@ function go(id){
 async function joinRoom(){
   const nm=document.getElementById('joinName').value.trim();
   if(!nm){toast('이름을 입력해주세요');return;}
-  state.name=nm; state.status='lobby'; savePresence();
+  state.name=nm; state.status='lobby'; savePresence(); startEndWatch();
   document.getElementById('lobbyName').textContent=nm;
   const p=await getPhase();
   if(p==='create'||p==='battle') enterCreate(); else enterLobby();
@@ -451,6 +497,10 @@ let phaseTimer=null;
 function canFight(){return spent()===POINTS;}
 function startPhaseWatch(){stopPhaseWatch();applyPhase();phaseTimer=setInterval(applyPhase,2500);}
 function stopPhaseWatch(){if(phaseTimer){clearInterval(phaseTimer);phaseTimer=null;}}
+let endTimer=null;
+function startEndWatch(){stopEndWatch();endTimer=setInterval(checkEnd,3000);}
+function stopEndWatch(){if(endTimer){clearInterval(endTimer);endTimer=null;}}
+async function checkEnd(){if(IS_TEACHER)return;try{const p=await getPhase();if(p==='end'){stopEndWatch();stopPhaseWatch();go('end');}}catch(e){}}
 async function applyPhase(){
   const p=await getPhase();
   if(document.getElementById('s-lobby').classList.contains('on')){
@@ -523,8 +573,8 @@ return `class Character:
     def 공격하다(self):
         print(f"{self.name}이(가) 공격을 시도합니다!")
 
-    def 회복하다(self):
-        print(f"{self.name}이(가) 체력을 회복합니다!")
+    def 방어하다(self):
+        print(f"{self.name}이(가) 방어 태세를 취합니다!")
 
 
 # 내 캐릭터 만들기 (인스턴스)
@@ -552,12 +602,12 @@ function renderCode(){
   const blocks=[
     {label:'① 클래스 · 설계도', cls:'r-class', lines:['class Character:']},
     {label:'② 속성 · 가진 상태', cls:'r-attr', lines:['    def __init__(self, name, job, hp, attack, defense, outfit):','        self.name = name','        self.job = job','        self.hp = hp','        self.attack = attack','        self.defense = defense','        self.outfit = outfit']},
-    {label:'③ 메소드 · 할 수 있는 행동', cls:'r-method', lines:['    def 공격하다(self):','        print(f"{self.name}이(가) 공격을 시도합니다!")','','    def 회복하다(self):','        print(f"{self.name}이(가) 체력을 회복합니다!")']},
+    {label:'③ 메소드 · 할 수 있는 행동', cls:'r-method', lines:['    def 공격하다(self):','        print(f"{self.name}이(가) 공격을 시도합니다!")','','    def 방어하다(self):','        print(f"{self.name}이(가) 방어 태세를 취합니다!")']},
     {label:'④ 인스턴스 · 내가 만든 실체', cls:'r-inst', lines:['# 내 캐릭터 만들기',inst]},
     {label:'⑤ 사용 · 속성과 메소드 써보기', cls:'r-use', lines:[`print(${v}.job)        # 출력: ${state.job}`,`${v}.공격하다()         # 출력: ${state.name}이(가) 공격을 시도합니다!`]},
   ];
   document.getElementById('codeOut').innerHTML=blocks.map(b=>`<div class="cblock ${b.cls}"><span class="clabel">${b.label}</span><pre class="cpre">`+b.lines.map(l=>hl(l)).join('\n')+`</pre></div>`).join('');
-  var bb=document.getElementById('codeBackBtn');if(bb)bb.textContent=IS_TEACHER?'← 선생님 화면':'🔄 처음으로';
+  var bb=document.getElementById('codeBackBtn');if(bb)bb.textContent=IS_TEACHER?'← 선생님 화면':'🔄 처음으로';var eb=document.getElementById('codeEndBtn');if(eb)eb.style.display=IS_TEACHER?'block':'none';
 }
 function copyCode(){navigator.clipboard.writeText(genCode()).then(()=>toast('코드를 복사했어요!')).catch(()=>toast('길게 눌러 복사하세요'));}
 
@@ -580,6 +630,7 @@ function stopTeacher(){if(teacherTimer){clearInterval(teacherTimer);teacherTimer
 function leaveTeacher(){IS_TEACHER=false;stopTeacher();go('join');}
 async function teacherStart(){await setPhase('create');toast('제작을 시작했어요! 🚀');document.getElementById('phaseBadge').textContent='제작 중';document.getElementById('phaseBadge').className='phasebadge create';}
 async function teacherBattle(){await setPhase('battle');toast('싸움을 시작했어요! ⚔️');document.getElementById('phaseBadge').textContent='전투 중';document.getElementById('phaseBadge').className='phasebadge battle';if(IS_TEACHER&&canFight()){startBattle();}}
+async function teacherEnd(){if(!confirm('학생들 화면을 모두 "수업 끝"으로 종료할까요?'))return;await setPhase('end');toast('수업을 종료했어요 🏁');var pb=document.getElementById('phaseBadge');if(pb){pb.textContent='종료';pb.className='phasebadge end';}}
 async function teacherReset(){if(!confirm('모든 학생 현황을 지우고 대기실로 되돌릴까요?'))return;await clearAll();toast('초기화했어요');loadTeacher();document.getElementById('phaseBadge').textContent='대기실';document.getElementById('phaseBadge').className='phasebadge lobby';}
 async function loadTeacher(){
   const rows=await fetchPresence();rows.sort((a,b)=>(a.ts||0)-(b.ts||0));

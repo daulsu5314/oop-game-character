@@ -299,6 +299,13 @@
       <button class="btn gold" style="margin-top:14px" onclick="teacherBattle()">⚔️ 싸우기 시작!</button>
       <p style="text-align:center;color:var(--muted);font-size:12px;margin:8px 0 0">누르면 학생들의 "싸우기" 버튼이 열려요. (선생님 시범 캐릭터도 함께 전투)</p>
     </div>
+    <div class="tsec"><h3>⚙️ 실시간 연결 설정</h3>
+      <div id="sbStatus" style="font-size:13px;margin-bottom:10px"></div>
+      <input type="text" id="sbUrl" placeholder="Supabase Project URL (https://...supabase.co)" style="margin-bottom:8px" autocomplete="off">
+      <input type="text" id="sbKey" placeholder="anon public 키 (eyJ...)" autocomplete="off">
+      <button class="btn ghost" style="margin-top:10px" onclick="saveSupabase()">🔌 연결하기</button>
+      <p style="color:var(--muted);font-size:12px;margin:8px 0 0">⚠️ <b>코드 파일을 고치지 말고 여기에 붙여넣으세요.</b> 비워두면 전투·코드는 작동하지만 여러 기기 현황은 안 모입니다.</p>
+    </div>
     <div class="row2">
       <button class="btn ghost" onclick="teacherReset()">🧹 현황 초기화</button>
       <button class="btn ghost" onclick="leaveTeacher()">← 나가기</button>
@@ -311,8 +318,7 @@
 <script>
 /* ========== ⚙️ 설정: 아래 두 줄에 Supabase 키를 붙여넣으세요 (설치 가이드 참고) ========== */
 const SUPABASE_URL = "https://xeatjibowbbnmshxfurh.supabase.co";          // 예: https://abcd1234.supabase.co
-const SUPABASE_ANON_KEY = "sb_publishable_myE4uwpb3MBSYQHb1Yscjw_65Sm5fwS
-";     // 예: eyJhbGciOi...
+const SUPABASE_ANON_KEY = "sb_publishable_myE4uwpb3MBSYQHb1Yscjw_65Sm5fwS";     // 예: eyJhbGciOi...
 /* ===================================================================================== */
 
 const POINTS=100, ROOM='room';
@@ -325,7 +331,20 @@ let state={id:null,name:"",job:"전사",look:{outfit:"#3b6fe5"},stats:{hp:0,atta
 
 /* ---------- backend (Supabase + local fallback) ---------- */
 let sb=null, useSB=false, localRows={}, localPhase='lobby';
-function initBackend(){try{if(SUPABASE_URL&&SUPABASE_ANON_KEY&&window.supabase){sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);useSB=true;}}catch(e){useSB=false;}}
+let SB_URL=SUPABASE_URL, SB_KEY=SUPABASE_ANON_KEY;
+function initBackend(){try{
+  if(!SB_URL){try{SB_URL=localStorage.getItem('cm_sb_url')||'';}catch(e){}}
+  if(!SB_KEY){try{SB_KEY=localStorage.getItem('cm_sb_key')||'';}catch(e){}}
+  if(SB_URL&&SB_KEY&&window.supabase){sb=window.supabase.createClient(SB_URL,SB_KEY);useSB=true;}else{useSB=false;}
+}catch(e){useSB=false;}}
+function saveSupabase(){
+  const u=document.getElementById('sbUrl').value.trim();const k=document.getElementById('sbKey').value.trim();
+  try{localStorage.setItem('cm_sb_url',u);localStorage.setItem('cm_sb_key',k);}catch(e){}
+  SB_URL=u;SB_KEY=k;sb=null;useSB=false;initBackend();updateSbStatus();
+  toast(useSB?'실시간 연결됐어요! 🔌':'연결 정보를 다시 확인해주세요');
+}
+function updateSbStatus(){const el=document.getElementById('sbStatus');if(!el)return;
+  el.innerHTML=useSB?'<span style="color:var(--hp)">● 실시간 연결됨 — 여러 기기 현황이 모입니다</span>':'<span style="color:var(--gold)">● 미연결 — 이 기기에서만 동작 (전투·코드는 정상)</span>';}
 async function savePresence(){
   if(IS_TEACHER)return;
   const rec={id:state.id,name:state.name||'(이름없음)',job:state.job,outfit:state.look.outfit,
@@ -546,6 +565,8 @@ function openTeacher(){
   if(location.protocol==='file:'||location.hostname==='localhost')document.getElementById('qrWarn').style.display='block';
   try{document.getElementById('qr').src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=6&data='+encodeURIComponent(url);}catch(e){}
   loadTeacher();teacherTimer=setInterval(loadTeacher,4000);
+  try{var u=localStorage.getItem('cm_sb_url')||SB_URL||'';var k=localStorage.getItem('cm_sb_key')||SB_KEY||'';var iu=document.getElementById('sbUrl'),ik=document.getElementById('sbKey');if(iu&&!iu.value)iu.value=u;if(ik&&!ik.value)ik.value=k;}catch(e){}
+  updateSbStatus();
   renderTeacherChar();
 }
 function stopTeacher(){if(teacherTimer){clearInterval(teacherTimer);teacherTimer=null;}}

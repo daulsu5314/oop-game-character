@@ -305,7 +305,7 @@
       <div class="kv"><span>옷색</span><b id="r-look">-</b></div>
       <div class="kv"><span>전투 결과</span><b id="r-result">-</b></div>
       <p style="color:var(--muted);font-size:12.5px;margin:10px 0 0">👉 같은 <b style="color:var(--ink)">설계도(클래스)</b>인데 친구들마다 값이 다르죠? 이게 <b style="color:var(--ink)">"구조는 같지만 값은 다른"</b> 인스턴스예요.</p></div>
-    <button class="btn" onclick="go('code');renderCode()">코드로 보기 &lt;/&gt;</button>
+    <button class="btn" id="resultCodeBtn" style="display:none" onclick="go('code');renderCode()">코드로 보기 &lt;/&gt;</button>
   </section>
 
   <!-- CODE -->
@@ -550,6 +550,7 @@ function finish(win,cMax,mMax){
   v.querySelector('.big').textContent=win?'승리! 🎉':'패배… 💀';
   v.querySelector('p').textContent=win?'능력치를 잘 나눴구나! 균형이 승리를 만들었어.':'한 곳에 너무 몰빵했나? 다음엔 골고루 나눠보자.';
   document.getElementById('toResult').style.display='flex';
+  var rc=document.getElementById('resultCodeBtn');if(rc)rc.style.display=IS_TEACHER?'block':'none';
   document.getElementById('r-avatar').innerHTML=buildChar(state.look.outfit,state.job);
   document.getElementById('r-name').textContent=state.name;document.getElementById('r-job').textContent=state.job;
   document.getElementById('r-stats').textContent=`${state.stats.hp} / ${state.stats.attack} / ${state.stats.defense}`;

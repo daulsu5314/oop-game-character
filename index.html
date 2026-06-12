@@ -562,10 +562,11 @@ function renderCode(){
 function copyCode(){navigator.clipboard.writeText(genCode()).then(()=>toast('코드를 복사했어요!')).catch(()=>toast('길게 눌러 복사하세요'));}
 
 /* ---------- teacher ---------- */
-let teacherTimer=null, qrDrawn=false;
+let teacherTimer=null, qrDrawn=false, teacherInitDone=false;
 function openTeacher(){
   IS_TEACHER=true;
   go('teacher');
+  if(!teacherInitDone){teacherInitDone=true;setPhase('lobby');var pb0=document.getElementById('phaseBadge');if(pb0){pb0.textContent='대기실';pb0.className='phasebadge lobby';}}
   const url=location.href.split('#')[0];
   document.getElementById('siteUrl').textContent=url;
   if(location.protocol==='file:'||location.hostname==='localhost')document.getElementById('qrWarn').style.display='block';

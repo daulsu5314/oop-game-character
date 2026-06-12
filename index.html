@@ -118,6 +118,15 @@
 
   /* CODE */
   pre.code{background:#0d0c20;border:1px solid var(--line);border-radius:16px;padding:16px;overflow-x:auto;font-family:'JetBrains Mono','Noto Sans KR',monospace;font-size:12.5px;line-height:1.7;margin:6px 0}
+  .codewrap{background:#0d0c20;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:6px 0;overflow-x:auto}
+  .cblock{border-left:4px solid;padding:4px 0 4px 12px;margin:9px 0}
+  .cblock:first-child{margin-top:2px}
+  .cblock .clabel{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.5px;margin-bottom:3px}
+  .cblock .cpre{margin:0;background:none;border:none;padding:0;font-family:'JetBrains Mono','Noto Sans KR',monospace;font-size:12.5px;line-height:1.7;white-space:pre;color:#e7e6fb}
+  .r-class{border-color:var(--violet)} .r-class .clabel{color:var(--violet)}
+  .r-attr{border-color:var(--gold)} .r-attr .clabel{color:var(--gold)}
+  .r-method{border-color:var(--hp)} .r-method .clabel{color:var(--hp)}
+  .r-inst{border-color:var(--def)} .r-inst .clabel{color:var(--def)}
   .code .kw{color:#c792ea}.code .fn{color:#82aaff}.code .str{color:#c3e88d}.code .num{color:#f78c6c}.code .self{color:#f07178}.code .cm{color:#6b7394;font-style:italic}
   .next{background:linear-gradient(180deg,#2a2860,#211f48);border:1px solid var(--violet);border-radius:16px;padding:15px;margin:16px 0}.next b{color:#fff}
   .footer-actions{display:flex;gap:10px;margin-top:8px}
@@ -148,6 +157,7 @@
   .empty{text-align:center;color:var(--muted);padding:24px 10px;font-size:14px}
   .phasebadge{display:inline-block;font-size:12px;font-weight:800;padding:4px 12px;border-radius:20px;margin-left:8px}
   .phasebadge.lobby{background:#3a3760;color:#cfd0ee}.phasebadge.create{background:#1f5040;color:var(--hp)}.phasebadge.battle{background:#5a1f2e;color:#ff9a9a}
+  .tback{display:inline-block;color:var(--violet);font-size:13px;text-decoration:none;border-bottom:1px dashed var(--line);cursor:pointer;margin:-4px 0 12px}
   #wait-avatar svg{width:96px;height:auto}
   .warn{background:#3a2750;border:1px solid #6b4ad6;border-radius:12px;padding:10px 12px;font-size:12.5px;color:#d9cfff;margin-top:10px}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#fff;color:#161430;padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;opacity:0;transition:.3s;z-index:50;box-shadow:var(--shadow)}
@@ -186,6 +196,7 @@
   <!-- INPUT -->
   <section id="s-input" class="screen">
     <div class="sec-title">내 캐릭터 만들기<span class="small">직업·옷색 고르고, 능력치 100점을 나눠요</span></div>
+    <a id="tBack" class="tback" style="display:none" onclick="returnTeacher()">← 선생님 화면으로</a>
     <label class="fld">직업</label>
     <div class="jobs" id="jobs">
       <div class="job sel" data-job="전사"><span class="ico">⚔️</span>전사</div>
@@ -256,10 +267,9 @@
   <!-- CODE -->
   <section id="s-code" class="screen">
     <div class="sec-title">파이썬 코드로는?<span class="small">네가 설계한 게 진짜 파이썬 코드가 됐어요</span></div>
-    <pre class="code" id="codeOut"></pre>
+    <div class="code codewrap" id="codeOut"></div>
     <button class="btn ghost" onclick="copyCode()">📋 코드 복사하기</button>
-    <div class="next"><div class="eyebrow">다음 시간 예고</div><p style="margin:6px 0 0">이번엔 <b>몬스터</b>랑 싸웠지만, 다음 시간엔 <b>내 캐릭터끼리</b> 싸우게 만들 거예요. 객체와 객체가 주고받는 <b>객체 간 상호작용</b>이 진짜 핵심!</p></div>
-    <div class="footer-actions"><button class="btn ghost" onclick="resetAll()">🔄 처음으로</button></div>
+    <div class="footer-actions"><button class="btn ghost" id="codeBackBtn" onclick="backHome()">🔄 처음으로</button></div>
   </section>
 
   <!-- TEACHER -->
@@ -269,6 +279,10 @@
       <div class="qrbox"><div id="qr"></div>
         <div class="qrinfo">휴대폰 카메라로 QR을 스캔하면 입장 화면으로 들어와요.<div class="url" id="siteUrl"></div></div></div>
       <div class="warn" id="qrWarn" style="display:none">⚠️ 아직 인터넷에 배포되지 않은 주소예요. GitHub/Vercel에 올린 뒤 그 주소로 열면 QR이 정상 작동합니다.</div>
+    </div>
+    <div class="tsec"><h3>🎬 선생님 시범 캐릭터</h3>
+      <div id="teacherCharBox"></div>
+      <button class="btn ghost" style="margin-top:10px" onclick="makeTeacherChar()">🎬 내 캐릭터 만들기</button>
     </div>
     <div class="tsec"><h3>👥 입장 현황 · <span id="joinNum" style="color:var(--gold)">0</span>명</h3>
       <div class="namechips" id="nameChips"></div>
@@ -297,7 +311,8 @@
 <script>
 /* ========== ⚙️ 설정: 아래 두 줄에 Supabase 키를 붙여넣으세요 (설치 가이드 참고) ========== */
 const SUPABASE_URL = "https://xeatjibowbbnmshxfurh.supabase.co";          // 예: https://abcd1234.supabase.co
-const SUPABASE_ANON_KEY = "sb_publishable_myE4uwpb3MBSYQHb1Yscjw_65Sm5fwS";     // 예: eyJhbGciOi...
+const SUPABASE_ANON_KEY = "sb_publishable_myE4uwpb3MBSYQHb1Yscjw_65Sm5fwS
+";     // 예: eyJhbGciOi...
 /* ===================================================================================== */
 
 const POINTS=100, ROOM='room';
@@ -312,6 +327,7 @@ let state={id:null,name:"",job:"전사",look:{outfit:"#3b6fe5"},stats:{hp:0,atta
 let sb=null, useSB=false, localRows={}, localPhase='lobby';
 function initBackend(){try{if(SUPABASE_URL&&SUPABASE_ANON_KEY&&window.supabase){sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);useSB=true;}}catch(e){useSB=false;}}
 async function savePresence(){
+  if(IS_TEACHER)return;
   const rec={id:state.id,name:state.name||'(이름없음)',job:state.job,outfit:state.look.outfit,
     hp:state.stats.hp,attack:state.stats.attack,defense:state.stats.defense,status:state.status,result:state.result,ts:Date.now()};
   localRows[state.id]=rec;
@@ -399,7 +415,7 @@ async function enterLobby(){
 }
 function stopLobby(){if(lobbyTimer){clearInterval(lobbyTimer);lobbyTimer=null;}}
 function enterCreate(){
-  buildSwatches();renderPreview();state.status='making';savePresence();refreshFight();go('input');startPhaseWatch();
+  buildSwatches();renderPreview();state.status='making';savePresence();refreshFight();go('input');startPhaseWatch();document.getElementById('tBack').style.display=IS_TEACHER?'inline-block':'none';
 }
 
 /* ---------- swatches + preview ---------- */
@@ -424,6 +440,7 @@ function canFight(){return spent()===POINTS;}
 function startPhaseWatch(){stopPhaseWatch();phaseTimer=setInterval(async()=>{const p=await getPhase();if(p==='battle'&&canFight()){stopPhaseWatch();startBattle();}},2500);}
 function stopPhaseWatch(){if(phaseTimer){clearInterval(phaseTimer);phaseTimer=null;}}
 async function readyUp(){if(!canFight())return;state.status='ready';savePresence();
+  if(IS_TEACHER){toast('시범 캐릭터 준비 완료 ✅');returnTeacher();return;}
   document.getElementById('wait-avatar').innerHTML=buildChar(state.look.outfit,state.job);
   go('wait');const p=await getPhase();if(p==='battle'){stopPhaseWatch();startBattle();}}
 
@@ -489,27 +506,49 @@ return `class Character:
 
 # 내 캐릭터 만들기 (인스턴스)
 ${v} = Character("${state.name}", "${state.job}", ${state.stats.hp}, ${state.stats.attack}, ${state.stats.defense}, "${oc}")`;}
-function hl(code){let s=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  s=s.replace(/(#[^\n]*)/g,'<span class="cm">$1</span>');s=s.replace(/\b(class|def|pass)\b/g,'<span class="kw">$1</span>');
-  s=s.replace(/\bself\b/g,'<span class="self">self</span>');s=s.replace(/("[^"]*")/g,'<span class="str">$1</span>');
-  s=s.replace(/\b(\d+)\b/g,'<span class="num">$1</span>');s=s.replace(/(def )(공격하다|회복하다|__init__)/g,'$1<span class="fn">$2</span>');return s;}
-function renderCode(){document.getElementById('codeOut').innerHTML=hl(genCode());}
+function hl(code){
+  const esc=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const re=/(#[^\n]*)|("[^"]*")|\b(def)(\s+)([A-Za-z_\uAC00-\uD7A3][\w\uAC00-\uD7A3]*)|\b(class|pass|return|None|True|False)\b|\b(self)\b|\b(\d+)\b/g;
+  return esc.replace(re,function(m,c,s,defkw,ws,fn,kw,sf,num){
+    if(c) return '<span class="cm">'+c+'</span>';
+    if(s) return '<span class="str">'+s+'</span>';
+    if(defkw) return '<span class="kw">'+defkw+'</span>'+ws+'<span class="fn">'+fn+'</span>';
+    if(kw) return '<span class="kw">'+kw+'</span>';
+    if(sf) return '<span class="self">'+sf+'</span>';
+    if(num) return '<span class="num">'+num+'</span>';
+    return m;
+  });
+}
+function renderCode(){
+  const v=pyName(state.name,'내캐릭터'), oc=colName(state.look.outfit);
+  const inst=`${v} = Character("${state.name}", "${state.job}", ${state.stats.hp}, ${state.stats.attack}, ${state.stats.defense}, "${oc}")`;
+  const blocks=[
+    {label:'① 클래스 · 설계도', cls:'r-class', lines:['class Character:']},
+    {label:'② 속성 · 가진 상태', cls:'r-attr', lines:['    def __init__(self, name, job, hp, attack, defense, outfit):','        self.name = name','        self.job = job','        self.hp = hp','        self.attack = attack','        self.defense = defense','        self.outfit = outfit']},
+    {label:'③ 메소드 · 할 수 있는 행동', cls:'r-method', lines:['    def 공격하다(self):','        pass','','    def 회복하다(self):','        pass']},
+    {label:'④ 인스턴스 · 내가 만든 실체', cls:'r-inst', lines:['# 내 캐릭터 만들기',inst]},
+  ];
+  document.getElementById('codeOut').innerHTML=blocks.map(b=>`<div class="cblock ${b.cls}"><span class="clabel">${b.label}</span><pre class="cpre">`+b.lines.map(l=>hl(l)).join('\n')+`</pre></div>`).join('');
+  var bb=document.getElementById('codeBackBtn');if(bb)bb.textContent=IS_TEACHER?'← 선생님 화면':'🔄 처음으로';
+}
 function copyCode(){navigator.clipboard.writeText(genCode()).then(()=>toast('코드를 복사했어요!')).catch(()=>toast('길게 눌러 복사하세요'));}
 
 /* ---------- teacher ---------- */
 let teacherTimer=null, qrDrawn=false;
 function openTeacher(){
+  IS_TEACHER=true;
   go('teacher');
   const url=location.href.split('#')[0];
   document.getElementById('siteUrl').textContent=url;
   if(location.protocol==='file:'||location.hostname==='localhost')document.getElementById('qrWarn').style.display='block';
   if(!qrDrawn&&window.QRCode){try{new QRCode(document.getElementById('qr'),{text:url,width:170,height:170,correctLevel:QRCode.CorrectLevel.M});qrDrawn=true;}catch(e){}}
   loadTeacher();teacherTimer=setInterval(loadTeacher,4000);
+  renderTeacherChar();
 }
 function stopTeacher(){if(teacherTimer){clearInterval(teacherTimer);teacherTimer=null;}}
-function leaveTeacher(){stopTeacher();go('join');}
+function leaveTeacher(){IS_TEACHER=false;stopTeacher();go('join');}
 async function teacherStart(){await setPhase('create');toast('제작을 시작했어요! 🚀');document.getElementById('phaseBadge').textContent='제작 중';document.getElementById('phaseBadge').className='phasebadge create';}
-async function teacherBattle(){await setPhase('battle');toast('싸움을 시작했어요! ⚔️');document.getElementById('phaseBadge').textContent='전투 중';document.getElementById('phaseBadge').className='phasebadge battle';}
+async function teacherBattle(){await setPhase('battle');toast('싸움을 시작했어요! ⚔️');document.getElementById('phaseBadge').textContent='전투 중';document.getElementById('phaseBadge').className='phasebadge battle';if(IS_TEACHER&&canFight()){startBattle();}}
 async function teacherReset(){if(!confirm('모든 학생 현황을 지우고 대기실로 되돌릴까요?'))return;await clearAll();toast('초기화했어요');loadTeacher();document.getElementById('phaseBadge').textContent='대기실';document.getElementById('phaseBadge').className='phasebadge lobby';}
 async function loadTeacher(){
   const rows=await fetchPresence();rows.sort((a,b)=>(a.ts||0)-(b.ts||0));
@@ -524,6 +563,23 @@ async function loadTeacher(){
     ${r.status==='done'?`<div class="gres ${r.result==='win'?'w':'l'}">${r.result==='win'?'승리 🏆':'패배'}</div>`:''}</div>`).join(''):'<div class="empty">제작을 시작하면 학생 캐릭터가 여기 떠요.</div>';
 }
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---------- teacher demo character ---------- */
+let IS_TEACHER=false;
+function makeTeacherChar(){ if(!state.name||state.name==='(이름없음)')state.name='선생님'; state.job='전사'; state.look={outfit:'#3b6fe5'}; state.stats={hp:0,attack:0,defense:0}; state.result=null; enterCreate(); }
+function editTeacherChar(){ enterCreate(); }
+function returnTeacher(){ openTeacher(); }
+function backHome(){ if(IS_TEACHER){returnTeacher();} else {resetAll();} }
+function renderTeacherChar(){ const box=document.getElementById('teacherCharBox'); if(!box)return;
+  if(IS_TEACHER && state.name && spent()===POINTS){
+    box.innerHTML=`<div style="display:flex;gap:12px;align-items:center"><div style="width:58px">${buildChar(state.look.outfit,state.job)}</div>
+      <div style="flex:1"><div style="font-weight:800">${esc(state.name)} <span style="color:var(--muted);font-size:12px">${esc(state.job)}</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">❤️${state.stats.hp} 🔥${state.stats.attack} 🛡️${state.stats.defense} · 옷 ${colName(state.look.outfit)}</div>
+      <div style="display:flex;gap:8px;margin-top:8px"><button class="ref" onclick="editTeacherChar()">✏️ 수정</button><button class="ref" onclick="go('code');renderCode()">&lt;/&gt; 코드 보기</button></div></div></div>`;
+  } else {
+    box.innerHTML='<p style="color:var(--muted);font-size:13px;margin:0">학생들에게 시범을 보일 내 캐릭터를 만들어 보세요. "싸움 시작"을 누르면 선생님 캐릭터도 함께 전투합니다.</p>';
+  }
+}
 
 /* ---------- misc ---------- */
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}

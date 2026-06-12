@@ -187,8 +187,9 @@
     <div class="lobby">
       <div class="spin">🧙‍♂️</div>
       <h2><span class="who" id="lobbyName">친구</span>님, 입장 완료!</h2>
-      <p>선생님이 시작하면 캐릭터를 만들 수 있어요.<br>잠시만 기다려 주세요.</p>
+      <p>선생님이 시작을 열어주면 캐릭터를 만들 수 있어요.<br>잠시만 기다려 주세요.</p>
       <div class="dots"><span></span><span></span><span></span></div>
+      <button class="btn" id="lobbyStartBtn" disabled style="max-width:260px;margin:18px auto 0" onclick="enterCreate()">⏳ 선생님을 기다리는 중…</button>
     </div>
   </section>
 
@@ -224,9 +225,9 @@
     <div class="lobby">
       <div id="wait-avatar" style="display:flex;justify-content:center"></div>
       <h2 style="margin-top:10px">준비 완료! ✅</h2>
-      <p>선생님이 <b style="color:var(--gold)">싸움 시작</b>을 누르면<br>전투가 시작돼요. 잠깐만 기다려요!</p>
-      <div class="dots"><span></span><span></span><span></span></div>
-      <button class="btn ghost" style="max-width:220px;margin:18px auto 0" onclick="go('input')">✏️ 다시 수정하기</button>
+      <p>선생님이 허락하면 아래 버튼으로<br>몬스터와 싸울 수 있어요!</p>
+      <button class="btn gold" id="waitBattleBtn" disabled style="max-width:260px;margin:16px auto 0" onclick="startBattle()">⏳ 선생님을 기다리는 중…</button>
+      <button class="btn ghost" style="max-width:200px;margin:10px auto 0" onclick="go('input')">✏️ 다시 수정하기</button>
     </div>
   </section>
 
@@ -295,8 +296,8 @@
         <div class="ccard done"><div class="n" id="c-done">0</div><div class="l">전투 완료</div></div>
       </div>
       <div class="ggrid" id="dashGrid"></div>
-      <button class="btn gold" style="margin-top:14px" onclick="teacherBattle()">⚔️ 싸움 시작!</button>
-      <p style="text-align:center;color:var(--muted);font-size:12px;margin:8px 0 0">모두 "완성 ✓" 되면 누르세요. 모든 학생의 전투가 동시에 시작돼요.</p>
+      <button class="btn gold" style="margin-top:14px" onclick="teacherBattle()">⚔️ 싸우기 시작!</button>
+      <p style="text-align:center;color:var(--muted);font-size:12px;margin:8px 0 0">누르면 학생들의 "싸우기" 버튼이 열려요. (선생님 시범 캐릭터도 함께 전투)</p>
     </div>
     <div class="row2">
       <button class="btn ghost" onclick="teacherReset()">🧹 현황 초기화</button>
@@ -310,7 +311,8 @@
 <script>
 /* ========== ⚙️ 설정: 아래 두 줄에 Supabase 키를 붙여넣으세요 (설치 가이드 참고) ========== */
 const SUPABASE_URL = "https://xeatjibowbbnmshxfurh.supabase.co";          // 예: https://abcd1234.supabase.co
-const SUPABASE_ANON_KEY = "sb_publishable_myE4uwpb3MBSYQHb1Yscjw_65Sm5fwS";     // 예: eyJhbGciOi...
+const SUPABASE_ANON_KEY = "sb_publishable_myE4uwpb3MBSYQHb1Yscjw_65Sm5fwS
+";     // 예: eyJhbGciOi...
 /* ===================================================================================== */
 
 const POINTS=100, ROOM='room';
@@ -387,8 +389,7 @@ function buildGoblin(){
 /* ---------- nav ---------- */
 function go(id){
   if(id!=='teacher')stopTeacher();
-  if(id!=='lobby')stopLobby();
-  if(id!=='input'&&id!=='wait')stopPhaseWatch();
+  if(id!=='lobby'&&id!=='wait')stopPhaseWatch();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById('s-'+id).classList.add('on');
   document.getElementById('wrap').classList.toggle('wide',id==='teacher');
@@ -404,16 +405,9 @@ async function joinRoom(){
   const p=await getPhase();
   if(p==='create'||p==='battle') enterCreate(); else enterLobby();
 }
-let lobbyTimer=null;
-async function enterLobby(){
-  go('lobby');
-  const check=async()=>{const p=await getPhase();if(p==='create'||p==='battle'){stopLobby();enterCreate();}};
-  await check();
-  lobbyTimer=setInterval(check,3000);
-}
-function stopLobby(){if(lobbyTimer){clearInterval(lobbyTimer);lobbyTimer=null;}}
+function enterLobby(){ go('lobby'); startPhaseWatch(); }
 function enterCreate(){
-  buildSwatches();renderPreview();state.status='making';savePresence();refreshFight();go('input');startPhaseWatch();document.getElementById('tBack').style.display=IS_TEACHER?'inline-block':'none';
+  buildSwatches();renderPreview();state.status='making';savePresence();refreshFight();go('input');document.getElementById('tBack').style.display=IS_TEACHER?'inline-block':'none';
 }
 
 /* ---------- swatches + preview ---------- */
@@ -435,12 +429,23 @@ function refreshFight(){const ready=spent()===POINTS;document.getElementById('fi
 /* ---------- ready & battle-phase watch (teacher controls start) ---------- */
 let phaseTimer=null;
 function canFight(){return spent()===POINTS;}
-function startPhaseWatch(){stopPhaseWatch();phaseTimer=setInterval(async()=>{const p=await getPhase();if(p==='battle'&&canFight()){stopPhaseWatch();startBattle();}},2500);}
+function startPhaseWatch(){stopPhaseWatch();applyPhase();phaseTimer=setInterval(applyPhase,2500);}
 function stopPhaseWatch(){if(phaseTimer){clearInterval(phaseTimer);phaseTimer=null;}}
+async function applyPhase(){
+  const p=await getPhase();
+  if(document.getElementById('s-lobby').classList.contains('on')){
+    const okk=(p==='create'||p==='battle');const btn=document.getElementById('lobbyStartBtn');
+    if(btn){btn.disabled=!okk;btn.textContent=okk?'🎮 캐릭터 만들기 시작!':'⏳ 선생님을 기다리는 중…';}
+  }
+  if(document.getElementById('s-wait').classList.contains('on')){
+    const okk=(p==='battle');const btn=document.getElementById('waitBattleBtn');
+    if(btn){btn.disabled=!okk;btn.textContent=okk?'⚔️ 싸우기 시작!':'⏳ 선생님을 기다리는 중…';}
+  }
+}
 async function readyUp(){if(!canFight())return;state.status='ready';savePresence();
   if(IS_TEACHER){toast('시범 캐릭터 준비 완료 ✅');returnTeacher();return;}
   document.getElementById('wait-avatar').innerHTML=buildChar(state.look.outfit,state.job);
-  go('wait');const p=await getPhase();if(p==='battle'){stopPhaseWatch();startBattle();}}
+  go('wait');startPhaseWatch();}
 
 /* ---------- battle ---------- */
 function startBattle(){

@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
 <style>
   :root{--bg:#13122a;--bg2:#1b1a3a;--surface:#23224a;--surface2:#2c2b58;--line:#3a3970;--ink:#edeefb;--muted:#9fa0d4;
     --hp:#3fd68c;--atk:#ff7e54;--def:#5b8def;--violet:#a487ff;--gold:#ffd24a;--shadow:0 10px 30px rgba(0,0,0,.4);}
@@ -135,7 +134,7 @@
   .tsec{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
   .tsec h3{font-family:'Black Han Sans';font-size:18px;margin:0 0 10px;color:#fff}
   .qrbox{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center}
-  #qr{background:#fff;padding:10px;border-radius:12px;line-height:0}
+  #qr{background:#fff;padding:10px;border-radius:12px;width:190px;height:190px;object-fit:contain}
   #qr img,#qr canvas{display:block}
   .qrinfo{flex:1;min-width:180px}
   .qrinfo .url{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--violet);word-break:break-all;background:var(--bg2);padding:8px 10px;border-radius:8px;margin-top:8px}
@@ -276,7 +275,7 @@
   <section id="s-teacher" class="screen">
     <div class="sec-title">선생님 화면 <span class="phasebadge lobby" id="phaseBadge">대기실</span><span class="small">학생 입장과 제작 현황이 실시간으로 보여요</span></div>
     <div class="tsec"><h3>📲 학생 입장 QR</h3>
-      <div class="qrbox"><div id="qr"></div>
+      <div class="qrbox"><img id="qr" alt="입장 QR" />
         <div class="qrinfo">휴대폰 카메라로 QR을 스캔하면 입장 화면으로 들어와요.<div class="url" id="siteUrl"></div></div></div>
       <div class="warn" id="qrWarn" style="display:none">⚠️ 아직 인터넷에 배포되지 않은 주소예요. GitHub/Vercel에 올린 뒤 그 주소로 열면 QR이 정상 작동합니다.</div>
     </div>
@@ -311,8 +310,7 @@
 <script>
 /* ========== ⚙️ 설정: 아래 두 줄에 Supabase 키를 붙여넣으세요 (설치 가이드 참고) ========== */
 const SUPABASE_URL = "https://xeatjibowbbnmshxfurh.supabase.co";          // 예: https://abcd1234.supabase.co
-const SUPABASE_ANON_KEY = "sb_publishable_myE4uwpb3MBSYQHb1Yscjw_65Sm5fwS
-";     // 예: eyJhbGciOi...
+const SUPABASE_ANON_KEY = "sb_publishable_myE4uwpb3MBSYQHb1Yscjw_65Sm5fwS";     // 예: eyJhbGciOi...
 /* ===================================================================================== */
 
 const POINTS=100, ROOM='room';
@@ -541,7 +539,7 @@ function openTeacher(){
   const url=location.href.split('#')[0];
   document.getElementById('siteUrl').textContent=url;
   if(location.protocol==='file:'||location.hostname==='localhost')document.getElementById('qrWarn').style.display='block';
-  if(!qrDrawn&&window.QRCode){try{new QRCode(document.getElementById('qr'),{text:url,width:170,height:170,correctLevel:QRCode.CorrectLevel.M});qrDrawn=true;}catch(e){}}
+  try{document.getElementById('qr').src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=6&data='+encodeURIComponent(url);}catch(e){}
   loadTeacher();teacherTimer=setInterval(loadTeacher,4000);
   renderTeacherChar();
 }

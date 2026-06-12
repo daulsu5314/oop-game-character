@@ -126,6 +126,7 @@
   .r-attr{border-color:var(--gold)} .r-attr .clabel{color:var(--gold)}
   .r-method{border-color:var(--hp)} .r-method .clabel{color:var(--hp)}
   .r-inst{border-color:var(--def)} .r-inst .clabel{color:var(--def)}
+  .r-use{border-color:#46d3c4} .r-use .clabel{color:#46d3c4}
   .code .kw{color:#c792ea}.code .fn{color:#82aaff}.code .str{color:#c3e88d}.code .num{color:#f78c6c}.code .self{color:#f07178}.code .cm{color:#6b7394;font-style:italic}
   .next{background:linear-gradient(180deg,#2a2860,#211f48);border:1px solid var(--violet);border-radius:16px;padding:15px;margin:16px 0}.next b{color:#fff}
   .footer-actions{display:flex;gap:10px;margin-top:8px}
@@ -520,14 +521,18 @@ return `class Character:
         self.outfit = outfit
 
     def 공격하다(self):
-        pass
+        print(f"{self.name}이(가) 공격을 시도합니다!")
 
     def 회복하다(self):
-        pass
+        print(f"{self.name}이(가) 체력을 회복합니다!")
 
 
 # 내 캐릭터 만들기 (인스턴스)
-${v} = Character("${state.name}", "${state.job}", ${state.stats.hp}, ${state.stats.attack}, ${state.stats.defense}, "${oc}")`;}
+${v} = Character("${state.name}", "${state.job}", ${state.stats.hp}, ${state.stats.attack}, ${state.stats.defense}, "${oc}")
+
+# 인스턴스 사용해 보기
+print(${v}.job)        # 출력: ${state.job}
+${v}.공격하다()         # 출력: ${state.name}이(가) 공격을 시도합니다!`;}
 function hl(code){
   const esc=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const re=/(#[^\n]*)|("[^"]*")|\b(def)(\s+)([A-Za-z_\uAC00-\uD7A3][\w\uAC00-\uD7A3]*)|\b(class|pass|return|None|True|False)\b|\b(self)\b|\b(\d+)\b/g;
@@ -547,8 +552,9 @@ function renderCode(){
   const blocks=[
     {label:'① 클래스 · 설계도', cls:'r-class', lines:['class Character:']},
     {label:'② 속성 · 가진 상태', cls:'r-attr', lines:['    def __init__(self, name, job, hp, attack, defense, outfit):','        self.name = name','        self.job = job','        self.hp = hp','        self.attack = attack','        self.defense = defense','        self.outfit = outfit']},
-    {label:'③ 메소드 · 할 수 있는 행동', cls:'r-method', lines:['    def 공격하다(self):','        pass','','    def 회복하다(self):','        pass']},
+    {label:'③ 메소드 · 할 수 있는 행동', cls:'r-method', lines:['    def 공격하다(self):','        print(f"{self.name}이(가) 공격을 시도합니다!")','','    def 회복하다(self):','        print(f"{self.name}이(가) 체력을 회복합니다!")']},
     {label:'④ 인스턴스 · 내가 만든 실체', cls:'r-inst', lines:['# 내 캐릭터 만들기',inst]},
+    {label:'⑤ 사용 · 속성과 메소드 써보기', cls:'r-use', lines:[`print(${v}.job)        # 출력: ${state.job}`,`${v}.공격하다()         # 출력: ${state.name}이(가) 공격을 시도합니다!`]},
   ];
   document.getElementById('codeOut').innerHTML=blocks.map(b=>`<div class="cblock ${b.cls}"><span class="clabel">${b.label}</span><pre class="cpre">`+b.lines.map(l=>hl(l)).join('\n')+`</pre></div>`).join('');
   var bb=document.getElementById('codeBackBtn');if(bb)bb.textContent=IS_TEACHER?'← 선생님 화면':'🔄 처음으로';
